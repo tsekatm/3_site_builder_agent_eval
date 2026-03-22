@@ -1,0 +1,49 @@
+{
+  "template": "Blog-Capaciti - Option 2",
+  "business": "Meridian Legal Partners",
+  "environment": "dev",
+  "aws": {
+    "region": "eu-west-1",
+    "account_id": "536580886816",
+    "profile": "Tebogo-dev"
+  },
+  "s3": {
+    "bucket": "3-0-site-builder-deployed-sites-dev",
+    "prefix": "staging/meridian-legal-partners/",
+    "cache_control": {
+      "html": "no-cache, no-store, must-revalidate",
+      "assets": "max-age=31536000, immutable"
+    },
+    "content_types": {
+      ".html": "text/html",
+      ".css": "text/css",
+      ".js": "application/javascript",
+      ".svg": "image/svg+xml",
+      ".jpg": "image/jpeg",
+      ".png": "image/png",
+      ".webp": "image/webp",
+      ".json": "application/json"
+    }
+  },
+  "cloudfront": {
+    "distribution_id": "STAGING_DISTRIBUTION",
+    "domain": "dev.meridian-legal-partners.preview.example.com",
+    "invalidation_paths": ["/*"]
+  },
+  "staging_url": "https://dev.meridian-legal-partners.preview.example.com",
+  "files": [
+    "index.html",
+    "css/styles.css",
+    "assets/logos/meridian-legal-partners-logo.svg",
+    "assets/logos/meridian-legal-partners-logo-white.svg",
+    "assets/logos/meridian-legal-partners-favicon.png",
+    "assets/images/meridian-legal-partners-hero-bg.jpg",
+    "assets/images/meridian-legal-partners-cta-bg.jpg"
+  ],
+  "verification": {
+    "health_check_url": "https://dev.meridian-legal-partners.preview.example.com/index.html",
+    "expected_status": 200,
+    "expected_content_type": "text/html",
+    "expected_title": "Meridian Legal Partners — Strategic counsel for complex challenges"
+  }
+}

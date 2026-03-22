@@ -1,0 +1,49 @@
+{
+  "template": "Amandla Omoya Trust",
+  "business": "Thrive Africa Foundation",
+  "environment": "dev",
+  "aws": {
+    "region": "eu-west-1",
+    "account_id": "536580886816",
+    "profile": "Tebogo-dev"
+  },
+  "s3": {
+    "bucket": "3-0-site-builder-deployed-sites-dev",
+    "prefix": "staging/thrive-africa-foundation/",
+    "cache_control": {
+      "html": "no-cache, no-store, must-revalidate",
+      "assets": "max-age=31536000, immutable"
+    },
+    "content_types": {
+      ".html": "text/html",
+      ".css": "text/css",
+      ".js": "application/javascript",
+      ".svg": "image/svg+xml",
+      ".jpg": "image/jpeg",
+      ".png": "image/png",
+      ".webp": "image/webp",
+      ".json": "application/json"
+    }
+  },
+  "cloudfront": {
+    "distribution_id": "STAGING_DISTRIBUTION",
+    "domain": "dev.thrive-africa-foundation.preview.example.com",
+    "invalidation_paths": ["/*"]
+  },
+  "staging_url": "https://dev.thrive-africa-foundation.preview.example.com",
+  "files": [
+    "index.html",
+    "css/styles.css",
+    "assets/logos/thrive-africa-foundation-logo.svg",
+    "assets/logos/thrive-africa-foundation-logo-white.svg",
+    "assets/logos/thrive-africa-foundation-favicon.png",
+    "assets/images/thrive-africa-foundation-hero-bg.jpg",
+    "assets/images/thrive-africa-foundation-cta-bg.jpg"
+  ],
+  "verification": {
+    "health_check_url": "https://dev.thrive-africa-foundation.preview.example.com/index.html",
+    "expected_status": 200,
+    "expected_content_type": "text/html",
+    "expected_title": "Thrive Africa Foundation — Empowering young Africans to lead"
+  }
+}

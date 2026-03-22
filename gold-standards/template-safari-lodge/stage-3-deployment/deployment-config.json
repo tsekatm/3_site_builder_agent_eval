@@ -1,0 +1,50 @@
+{
+  "template": "Etali Safari Website",
+  "business": "Karoo Starlight Lodge",
+  "environment": "dev",
+  "aws": {
+    "region": "eu-west-1",
+    "account_id": "536580886816",
+    "profile": "Tebogo-dev"
+  },
+  "s3": {
+    "bucket": "3-0-site-builder-deployed-sites-dev",
+    "prefix": "staging/karoo-starlight-lodge/",
+    "cache_control": {
+      "html": "no-cache, no-store, must-revalidate",
+      "assets": "max-age=31536000, immutable"
+    },
+    "content_types": {
+      ".html": "text/html",
+      ".css": "text/css",
+      ".js": "application/javascript",
+      ".svg": "image/svg+xml",
+      ".jpg": "image/jpeg",
+      ".png": "image/png",
+      ".webp": "image/webp",
+      ".json": "application/json"
+    }
+  },
+  "cloudfront": {
+    "distribution_id": "STAGING_DISTRIBUTION",
+    "domain": "dev.karoo-starlight-lodge.preview.example.com",
+    "invalidation_paths": ["/*"]
+  },
+  "staging_url": "https://dev.karoo-starlight-lodge.preview.example.com",
+  "files": [
+    "index.html",
+    "css/styles.css",
+    "assets/logos/karoo-starlight-lodge-logo.svg",
+    "assets/logos/karoo-starlight-lodge-logo-white.svg",
+    "assets/logos/karoo-starlight-lodge-favicon.png",
+    "assets/images/karoo-starlight-lodge-hero-bg.jpg",
+    "assets/images/karoo-starlight-lodge-about-bg.jpg",
+    "assets/images/karoo-starlight-lodge-cta-bg.jpg"
+  ],
+  "verification": {
+    "health_check_url": "https://dev.karoo-starlight-lodge.preview.example.com/index.html",
+    "expected_status": 200,
+    "expected_content_type": "text/html",
+    "expected_title": "Karoo Starlight Lodge — Under African skies, find yourself again"
+  }
+}

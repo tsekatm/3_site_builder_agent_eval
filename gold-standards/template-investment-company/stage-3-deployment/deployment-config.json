@@ -1,0 +1,49 @@
+{
+  "template": "Metis",
+  "business": "Quantum Consulting Group",
+  "environment": "dev",
+  "aws": {
+    "region": "eu-west-1",
+    "account_id": "536580886816",
+    "profile": "Tebogo-dev"
+  },
+  "s3": {
+    "bucket": "3-0-site-builder-deployed-sites-dev",
+    "prefix": "staging/quantum-consulting-group/",
+    "cache_control": {
+      "html": "no-cache, no-store, must-revalidate",
+      "assets": "max-age=31536000, immutable"
+    },
+    "content_types": {
+      ".html": "text/html",
+      ".css": "text/css",
+      ".js": "application/javascript",
+      ".svg": "image/svg+xml",
+      ".jpg": "image/jpeg",
+      ".png": "image/png",
+      ".webp": "image/webp",
+      ".json": "application/json"
+    }
+  },
+  "cloudfront": {
+    "distribution_id": "STAGING_DISTRIBUTION",
+    "domain": "dev.quantum-consulting-group.preview.example.com",
+    "invalidation_paths": ["/*"]
+  },
+  "staging_url": "https://dev.quantum-consulting-group.preview.example.com",
+  "files": [
+    "index.html",
+    "css/styles.css",
+    "assets/logos/quantum-consulting-group-logo.svg",
+    "assets/logos/quantum-consulting-group-logo-white.svg",
+    "assets/logos/quantum-consulting-group-favicon.png",
+    "assets/images/quantum-consulting-group-hero-bg.jpg",
+    "assets/images/quantum-consulting-group-cta-bg.jpg"
+  ],
+  "verification": {
+    "health_check_url": "https://dev.quantum-consulting-group.preview.example.com/index.html",
+    "expected_status": 200,
+    "expected_content_type": "text/html",
+    "expected_title": "Quantum Consulting Group — Transforming complexity into competitive advantage"
+  }
+}

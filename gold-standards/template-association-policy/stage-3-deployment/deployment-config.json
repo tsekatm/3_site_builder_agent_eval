@@ -1,0 +1,49 @@
+{
+  "template": "HASA - NHI",
+  "business": "ClearPath Insurance Brokers",
+  "environment": "dev",
+  "aws": {
+    "region": "eu-west-1",
+    "account_id": "536580886816",
+    "profile": "Tebogo-dev"
+  },
+  "s3": {
+    "bucket": "3-0-site-builder-deployed-sites-dev",
+    "prefix": "staging/clearpath-insurance-brokers/",
+    "cache_control": {
+      "html": "no-cache, no-store, must-revalidate",
+      "assets": "max-age=31536000, immutable"
+    },
+    "content_types": {
+      ".html": "text/html",
+      ".css": "text/css",
+      ".js": "application/javascript",
+      ".svg": "image/svg+xml",
+      ".jpg": "image/jpeg",
+      ".png": "image/png",
+      ".webp": "image/webp",
+      ".json": "application/json"
+    }
+  },
+  "cloudfront": {
+    "distribution_id": "STAGING_DISTRIBUTION",
+    "domain": "dev.clearpath-insurance-brokers.preview.example.com",
+    "invalidation_paths": ["/*"]
+  },
+  "staging_url": "https://dev.clearpath-insurance-brokers.preview.example.com",
+  "files": [
+    "index.html",
+    "css/styles.css",
+    "assets/logos/clearpath-insurance-brokers-logo.svg",
+    "assets/logos/clearpath-insurance-brokers-logo-white.svg",
+    "assets/logos/clearpath-insurance-brokers-favicon.png",
+    "assets/images/clearpath-insurance-brokers-hero-bg.jpg",
+    "assets/images/clearpath-insurance-brokers-cta-bg.jpg"
+  ],
+  "verification": {
+    "health_check_url": "https://dev.clearpath-insurance-brokers.preview.example.com/index.html",
+    "expected_status": 200,
+    "expected_content_type": "text/html",
+    "expected_title": "ClearPath Insurance Brokers — Protection made personal"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "template": "CAPACITI Phase 2",
+  "business": "Solaris Wealth Advisors",
+  "environment": "dev",
+  "aws": {
+    "region": "eu-west-1",
+    "account_id": "536580886816",
+    "profile": "Tebogo-dev"
+  },
+  "s3": {
+    "bucket": "3-0-site-builder-deployed-sites-dev",
+    "prefix": "staging/solaris-wealth-advisors/",
+    "cache_control": {
+      "html": "no-cache, no-store, must-revalidate",
+      "assets": "max-age=31536000, immutable"
+    },
+    "content_types": {
+      ".html": "text/html",
+      ".css": "text/css",
+      ".js": "application/javascript",
+      ".svg": "image/svg+xml",
+      ".jpg": "image/jpeg",
+      ".png": "image/png",
+      ".webp": "image/webp",
+      ".json": "application/json"
+    }
+  },
+  "cloudfront": {
+    "distribution_id": "STAGING_DISTRIBUTION",
+    "domain": "dev.solaris-wealth-advisors.preview.example.com",
+    "invalidation_paths": ["/*"]
+  },
+  "staging_url": "https://dev.solaris-wealth-advisors.preview.example.com",
+  "files": [
+    "index.html",
+    "css/styles.css",
+    "assets/logos/solaris-wealth-advisors-logo.svg",
+    "assets/logos/solaris-wealth-advisors-logo-white.svg",
+    "assets/logos/solaris-wealth-advisors-favicon.png",
+    "assets/images/solaris-wealth-advisors-hero-bg.jpg",
+    "assets/images/solaris-wealth-advisors-cta-bg.jpg"
+  ],
+  "verification": {
+    "health_check_url": "https://dev.solaris-wealth-advisors.preview.example.com/index.html",
+    "expected_status": 200,
+    "expected_content_type": "text/html",
+    "expected_title": "Solaris Wealth Advisors — Clarity in every financial decision"
+  }
+}

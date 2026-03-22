@@ -1,0 +1,29 @@
+# Eval runs (timestamped, large, not version-controlled)
+runs/
+
+# Environment
+.env
+.env.*
+
+# Terraform state
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
