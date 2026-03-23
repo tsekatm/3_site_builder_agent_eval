@@ -3,7 +3,7 @@
 **Project**: Agent/Skill Evaluation & Refinement Pipeline
 **Created**: 2026-03-21
 **Updated**: 2026-03-22
-**Status**: IN PROGRESS — Stage 4 HLD approved, Stage 5 Gold Standards next
+**Status**: IN PROGRESS — Stage 7 LLD approved, Stage 8 Tier 1 Build in progress
 **Owner**: Tebogo Tseka
 **Methodology**: Agentic Project Manager (Multi-Stage, Multi-Sub-Plan)
 
@@ -296,33 +296,33 @@ Agents currently run on Claude SDK. Configurable routing to Bedrock models.
 | 5.7 | Stage 3 reference: 21 deployment configs | COMPLETE | — |
 | 5.8 | HITL: Verify Stage 3 (deployment configs) | COMPLETE | — |
 | 5.9 | ~~Screenshots~~ → moved to Stage 8 (eval engine captures at runtime) | N/A | — |
-| 5.10 | Commit gold standards to git | PENDING | — |
+| 5.10 | Commit gold standards to git | COMPLETE (5a7bbb2) | — |
 | | *Note: Single-page gold standards for prototype. Multi-page expansion planned for future iteration.* | | |
 | | | | |
 | | **TIER 1 — IDE / LOCAL** | | |
-| **6** | **LLD: Tier 1 (IDE / Local)** | PENDING | [View](stage-6-lld-tier1.md) |
-| 6.1 | Shared core module specification (`eval_core/`) | PENDING | — |
-| 6.2 | CLI command specification | PENDING | — |
-| 6.3 | Bedrock runner specification | PENDING | — |
-| 6.4 | Model config schema (`eval_config.yaml`) | PENDING | — |
-| 6.5 | Parallel execution engine specification | PENDING | — |
-| 6.6 | Folder comparison engine specification | PENDING | — |
-| 6.7 | Visual comparison specification (Playwright + SSIM) | PENDING | — |
-| 6.8 | Judge prompt specification (code + screenshot + rubric) | PENDING | — |
-| 6.9 | Violation catalogue specification (YAML format) | PENDING | — |
-| 6.10 | Scoring engine specification (10 - deductions, no floor) | PENDING | — |
-| 6.11 | Refinement engine specification | PENDING | — |
-| 6.12 | Run versioning specification | PENDING | — |
-| 6.13 | Report generation specification | PENDING | — |
-| 6.14 | Proxy router specification (AnthropicBedrock) | PENDING | — |
-| 6.15 | Test plan (TDD) | PENDING | — |
-| 6.16 | LLD document assembly | PENDING | — |
+| **6** | **LLD: Tier 1 (IDE / Local)** | **COMPLETE** | [3.7.1_LLD](../../../2_bbws_docs/LLDs/3_site_builder/3.7.1_LLD_Eval_Pack_Tier1_Local.md) |
+| 6.1 | Shared core module specification (`eval_core/`) | COMPLETE | — |
+| 6.2 | CLI command specification | COMPLETE | — |
+| 6.3 | Bedrock runner specification | COMPLETE | — |
+| 6.4 | Model config schema (`eval_config.yaml`) | COMPLETE | — |
+| 6.5 | Parallel execution engine specification | COMPLETE | — |
+| 6.6 | Folder comparison engine specification | COMPLETE | — |
+| 6.7 | Visual comparison specification (Playwright + SSIM) | COMPLETE | — |
+| 6.8 | Judge prompt specification (code + screenshot + rubric) | COMPLETE | — |
+| 6.9 | Violation catalogue specification (YAML format) | COMPLETE | — |
+| 6.10 | Scoring engine specification (10 - deductions, no floor) | COMPLETE | — |
+| 6.11 | Refinement engine specification | COMPLETE | — |
+| 6.12 | Run versioning specification | COMPLETE | — |
+| 6.13 | Report generation specification | COMPLETE | — |
+| 6.14 | Proxy router specification (AnthropicBedrock) | COMPLETE | — |
+| 6.15 | Test plan (TDD) | COMPLETE | — |
+| 6.16 | LLD document assembly | COMPLETE | — |
 | | | | |
-| **7** | **HITL: Tier 1 LLD Approval** | PENDING | [View](stage-7-hitl-lld-tier1.md) |
-| 7.1 | Present Tier 1 LLD for review | PENDING | — |
-| 7.2 | Walk through specifications | PENDING | — |
-| 7.3 | Collect feedback & iterate | PENDING | — |
-| 7.4 | Final Tier 1 LLD approval | PENDING | — |
+| **7** | **HITL: Tier 1 LLD Approval** | **COMPLETE** | — |
+| 7.1 | Present Tier 1 LLD for review | COMPLETE | — |
+| 7.2 | Walk through specifications | COMPLETE | — |
+| 7.3 | Collect feedback & iterate | COMPLETE (added per-action eval model v1.1) | — |
+| 7.4 | Final Tier 1 LLD approval | COMPLETE (2026-03-23) | — |
 | | | | |
 | **8** | **Build: Tier 1 (IDE / Local)** | PENDING | [View](stage-8-tier1-build.md) |
 | 8.1 | Project scaffold & shared core | PENDING | — |

@@ -29,9 +29,12 @@ dev = [
 [project.scripts]
 eval-cli = "eval_packs.local.cli.main:cli"
 
+[tool.coverage.run]
+source = ["eval_core", "eval_packs"]
+
+[tool.setuptools.packages.find]
+include = ["eval_core*", "eval_packs*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-
-[tool.coverage.run]
-source = ["eval_core", "eval_packs"]
