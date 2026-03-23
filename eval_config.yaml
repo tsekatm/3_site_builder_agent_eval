@@ -32,7 +32,7 @@ models:
 
 judges:
   default:
-    model_id: "anthropic.claude-opus-4-20250514"
+    model_id: "us.anthropic.claude-opus-4-6-v1"
     region: "us-east-1"
     params:
       temperature: 0.0
@@ -40,7 +40,7 @@ judges:
 
 teachers:
   default:
-    model_id: "anthropic.claude-opus-4-20250514"
+    model_id: "us.anthropic.claude-opus-4-6-v1"
     region: "us-east-1"
     params:
       temperature: 0.3
@@ -51,6 +51,9 @@ paths:
   templates: "../bigbeard-templates"
   runs: "./runs"
   violations: "./eval_core/scoring/violations.yaml"
+
+aws:
+  profile: "Tebogo-dev"
 
 defaults:
   parallel_workers: 3

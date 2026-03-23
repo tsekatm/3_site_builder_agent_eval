@@ -324,20 +324,20 @@ Agents currently run on Claude SDK. Configurable routing to Bedrock models.
 | 7.3 | Collect feedback & iterate | COMPLETE (added per-action eval model v1.1) | — |
 | 7.4 | Final Tier 1 LLD approval | COMPLETE (2026-03-23) | — |
 | | | | |
-| **8** | **Build: Tier 1 (IDE / Local)** | PENDING | [View](stage-8-tier1-build.md) |
-| 8.1 | Project scaffold & shared core | PENDING | — |
-| 8.2 | Model config loader | PENDING | — |
-| 8.3 | Bedrock runners + proxy router | PENDING | — |
-| 8.4 | Parallel execution engine | PENDING | — |
-| 8.5 | Folder comparison engine | PENDING | — |
-| 8.6 | Visual comparison (Playwright + SSIM) | PENDING | — |
-| 8.7 | Judge engine (Opus multimodal: code + screenshots) | PENDING | — |
-| 8.8 | Scoring engine (violations → deductions → score) | PENDING | — |
-| 8.9 | Refinement engine (teacher + diff + apply) | PENDING | — |
-| 8.10 | Run versioning | PENDING | — |
-| 8.11 | Report generation | PENDING | — |
-| 8.12 | CLI commands | PENDING | — |
-| 8.13 | Integration testing | PENDING | — |
+| **8** | **Build: Tier 1 (IDE / Local)** | **COMPLETE** | 100 tests passing |
+| 8.1 | Project scaffold & shared core | COMPLETE | — |
+| 8.2 | Model config loader | COMPLETE | — |
+| 8.3 | Bedrock runners + proxy router | COMPLETE | — |
+| 8.4 | Parallel execution engine | COMPLETE | — |
+| 8.5 | Folder comparison engine | COMPLETE | — |
+| 8.6 | Visual comparison (Playwright + SSIM) | COMPLETE | — |
+| 8.7 | Judge engine (Opus multimodal: code + screenshots) | COMPLETE | — |
+| 8.8 | Scoring engine (violations → deductions → score) | COMPLETE | — |
+| 8.9 | Refinement engine (teacher + diff + apply) | COMPLETE | — |
+| 8.10 | Run versioning | COMPLETE | — |
+| 8.11 | Report generation | COMPLETE | — |
+| 8.12 | CLI commands | COMPLETE | — |
+| 8.13 | Integration testing | COMPLETE (100 unit tests) | — |
 | | | | |
 | **9** | **Execute: Tier 1 — Eval Run** | PENDING | [View](stage-9-tier1-execution.md) |
 | 9.1 | Baseline eval run (all models, all templates, all 3 stages) | PENDING | — |

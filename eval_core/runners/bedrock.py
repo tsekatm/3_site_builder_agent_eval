@@ -18,10 +18,11 @@ from eval_core.types import RunnerResponse
 class BedrockRunner(BaseRunner):
     """Invokes Bedrock models using Converse API (with InvokeModel fallback)."""
 
-    def __init__(self, name: str, config: ModelConfig):
+    def __init__(self, name: str, config: ModelConfig, aws_profile: str | None = None):
         self._name = name
         self._config = config
-        self._client = boto3.client("bedrock-runtime", region_name=config.region)
+        session = boto3.Session(profile_name=aws_profile) if aws_profile else boto3.Session()
+        self._client = session.client("bedrock-runtime", region_name=config.region)
 
     def model_id(self) -> str:
         return self._config.model_id
@@ -127,6 +128,6 @@ class BedrockRunner(BaseRunner):
         return output
 
 
-def create_runner(name: str, config: ModelConfig) -> BedrockRunner:
+def create_runner(name: str, config: ModelConfig, aws_profile: str | None = None) -> BedrockRunner:
     """Factory function to create a BedrockRunner from config."""
-    return BedrockRunner(name=name, config=config)
+    return BedrockRunner(name=name, config=config, aws_profile=aws_profile)
