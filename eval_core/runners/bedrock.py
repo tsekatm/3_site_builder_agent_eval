@@ -22,7 +22,9 @@ class BedrockRunner(BaseRunner):
         self._name = name
         self._config = config
         session = boto3.Session(profile_name=aws_profile) if aws_profile else boto3.Session()
-        self._client = session.client("bedrock-runtime", region_name=config.region)
+        from botocore.config import Config as BotoConfig
+        boto_config = BotoConfig(read_timeout=300, connect_timeout=10, retries={"max_attempts": 2})
+        self._client = session.client("bedrock-runtime", region_name=config.region, config=boto_config)
 
     def model_id(self) -> str:
         return self._config.model_id

@@ -41,7 +41,8 @@ async def capture_screenshot(
 
     async with async_playwright() as p:
         browser = await p.chromium.launch()
-        page = await browser.new_page(viewport_size=vp)
+        context = await browser.new_context(viewport=vp)
+        page = await context.new_page()
 
         # Disable animations for deterministic screenshots
         await page.add_style_tag(content=DISABLE_ANIMATIONS_CSS)
