@@ -1,0 +1,59 @@
+models:
+  deepseek-r1:
+    model_id: "us.deepseek.r1-v1:0"
+    region: "us-east-1"
+    params:
+      temperature: 0.3
+      max_tokens: 8192
+    tags: ["reasoning", "code-gen"]
+    converse_api: false
+    strip_think_blocks: true
+    enabled: true
+
+  deepseek-v3.2:
+    model_id: "deepseek.v3.2"
+    region: "us-east-1"
+    params:
+      temperature: 0.2
+      max_tokens: 8192
+    tags: ["code-gen", "fast"]
+    converse_api: true
+    enabled: true
+
+  kimi-k2.5:
+    model_id: "moonshotai.kimi-k2.5"
+    region: "us-east-1"
+    params:
+      temperature: 0.2
+      max_tokens: 16384
+    tags: ["multimodal", "code-gen"]
+    converse_api: true
+    enabled: true
+
+judges:
+  default:
+    model_id: "anthropic.claude-opus-4-20250514"
+    region: "us-east-1"
+    params:
+      temperature: 0.0
+      max_tokens: 8192
+
+teachers:
+  default:
+    model_id: "anthropic.claude-opus-4-20250514"
+    region: "us-east-1"
+    params:
+      temperature: 0.3
+      max_tokens: 8192
+
+paths:
+  gold_standards: "./gold-standards"
+  templates: "../bigbeard-templates"
+  runs: "./runs"
+  violations: "./eval_core/scoring/violations.yaml"
+
+defaults:
+  parallel_workers: 3
+  parallel_prompts: 5
+  timeout_seconds: 120
+  judge_runs: 1

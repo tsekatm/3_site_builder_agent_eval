@@ -1,0 +1,112 @@
+categories:
+  structural:
+    violations:
+      - id: STRUCT-MISSING-INDEX
+        description: Missing required file (index.html)
+        severity: critical
+        deduction: -3.0
+      - id: STRUCT-MISSING-ASSET
+        description: Missing asset file referenced in HTML
+        severity: major
+        deduction: -1.5
+      - id: STRUCT-WRONG-STRUCTURE
+        description: Wrong directory structure
+        severity: major
+        deduction: -1.0
+      - id: STRUCT-EXTRA-FILES
+        description: Extra/unexpected files
+        severity: minor
+        deduction: -0.25
+
+  visual:
+    violations:
+      - id: VIS-LAYOUT-BROKEN
+        description: Layout completely broken
+        severity: critical
+        deduction: -3.0
+      - id: VIS-MAJOR-DEVIATION
+        description: Significant visual deviation (SSIM < 0.7)
+        severity: major
+        deduction: -2.0
+      - id: VIS-MINOR-DEVIATION
+        description: Minor visual deviation (SSIM 0.7-0.9)
+        severity: moderate
+        deduction: -1.0
+      - id: VIS-COLOUR-MISMATCH
+        description: Colour mismatch vs reference
+        severity: moderate
+        deduction: -0.5
+
+  content:
+    violations:
+      - id: CONTENT-MISSING-TEXT
+        description: Missing text content from requirements
+        severity: critical
+        deduction: -2.0
+      - id: CONTENT-INCORRECT-TEXT
+        description: Incorrect text content
+        severity: major
+        deduction: -1.5
+      - id: CONTENT-PLACEHOLDER
+        description: Placeholder text not replaced
+        severity: major
+        deduction: -1.0
+      - id: CONTENT-MISSING-META
+        description: Missing meta tags
+        severity: minor
+        deduction: -0.25
+
+  code_quality:
+    violations:
+      - id: CODE-INVALID-HTML
+        description: Invalid HTML (W3C errors)
+        severity: moderate
+        deduction: -0.5
+        max_deduction: -2.0
+      - id: CODE-INVALID-CSS
+        description: Invalid CSS
+        severity: moderate
+        deduction: -0.5
+        max_deduction: -2.0
+      - id: CODE-HARDCODED-VALUES
+        description: Hardcoded values instead of CSS variables
+        severity: major
+        deduction: -1.0
+      - id: CODE-NO-RESPONSIVE
+        description: No responsive breakpoints
+        severity: major
+        deduction: -1.5
+
+  accessibility:
+    violations:
+      - id: A11Y-MISSING-ALT
+        description: Missing alt text on image
+        severity: moderate
+        deduction: -0.5
+      - id: A11Y-LOW-CONTRAST
+        description: Insufficient colour contrast
+        severity: moderate
+        deduction: -0.5
+      - id: A11Y-MISSING-ARIA
+        description: Missing ARIA labels
+        severity: minor
+        deduction: -0.25
+      - id: A11Y-NO-SKIP-LINK
+        description: Missing skip-to-content link
+        severity: minor
+        deduction: -0.25
+
+  performance:
+    violations:
+      - id: PERF-LARGE-IMAGE
+        description: Unoptimised image (>500KB)
+        severity: minor
+        deduction: -0.25
+      - id: PERF-NO-FONT-DISPLAY
+        description: No font-display swap
+        severity: minor
+        deduction: -0.25
+      - id: PERF-NO-LAZY-LOAD
+        description: Missing lazy loading on below-fold images
+        severity: minor
+        deduction: -0.25
