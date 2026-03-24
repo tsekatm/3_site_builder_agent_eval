@@ -100,9 +100,32 @@ AGENT_PROMPT = """You are a site builder agent customising a website template fo
    - NEVER use dark text colours (brown, black, dark grey) on sections with background images
    - Hero sections, CTA sections, and any section with background-image need --text-secondary (#FFFFFF) not --text-color
    - NEVER use local file paths like images/logo.png or assets/images/
-3. Replace ALL {{PLACEHOLDER}} tokens with actual business content
-4. Keep the template structure intact — modify content and styling, don't restructure HTML
-5. Return COMPLETE files, not fragments
+4. Replace ALL {{PLACEHOLDER}} tokens with actual business content
+5. Keep the template structure intact — modify content and styling, don't restructure HTML
+6. Return COMPLETE files, not fragments
+
+## LAYOUT RULES (apply when modifying layout or structure)
+- Hero section: Use full-viewport height with background image, dark overlay, and centered white text. Keep hero simple — headline, subtitle, description, feature pills, optional CTA button. No cards or complex layouts inside the hero.
+- Features/services section: Use CSS Grid (repeat(3, 1fr) on desktop). Each card has icon + heading + description. Responsive: 2 columns at 1024px, 1 column at 768px.
+- Alternating rows: Use flexbox with row/row-reverse. Image on one side, text on the other. Stack vertically on mobile.
+- Footer: 4-column grid (1.5fr repeat(3, 1fr)). Columns: brand/tagline, navigation links, hours/info, contact details. Stack on mobile.
+- ALL grids must have responsive breakpoints at 1024px and 768px.
+- Use CSS variables for spacing (gap, padding), not hardcoded pixel values.
+
+## CONTACT SECTION RULES
+- Create a dedicated contact section with individual cards per location
+- Each card: address, phone (wrapped in tel: link), hours
+- Add a separate email card with mailto: link
+- CTA button should link to phone (tel:) not email
+- Footer contact column must mirror the contact section data
+- Add JSON-LD structured data (LocalBusiness/Restaurant/Organization) with address, phone, email
+
+## CONTENT REPLACEMENT RULES
+- Copy text EXACTLY from the requirements — do not paraphrase, summarise, or reword
+- Feature card titles and descriptions must match requirements word-for-word
+- Hero headline, subtitle, and description must be exact matches
+- Business name must appear consistently in header, footer, meta title, JSON-LD
+- Contact details (phone, email, address) must be identical everywhere they appear
 
 ## Response Format
 Return your response in this EXACT format (no markdown, no explanation):
