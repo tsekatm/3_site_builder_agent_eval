@@ -18,7 +18,7 @@ class TestLoadConfig:
 
     def test_has_judge(self, config):
         assert "default" in config.judges
-        assert config.judges["default"].params["temperature"] == 0.0
+        assert config.judges["default"].provider in ("bedrock", "anthropic-direct", "claude-code")
 
     def test_has_teacher(self, config):
         assert "default" in config.teachers

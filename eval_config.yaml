@@ -32,19 +32,20 @@ models:
 
 judges:
   default:
-    model_id: "claude-opus-4-20250514"
-    provider: "anthropic-direct"
+    model_id: "claude-code-opus"
+    provider: "claude-code"
     params:
-      temperature: 0.0
-      max_tokens: 8192
+      cli_model: "opus"
+      timeout_seconds: 300
+      max_budget_usd: 5
 
 teachers:
   default:
-    model_id: "claude-sonnet-4-20250514"
-    provider: "anthropic-direct"
+    model_id: "claude-code-sonnet"
+    provider: "claude-code"
     params:
-      temperature: 0.3
-      max_tokens: 8192
+      cli_model: "sonnet"
+      timeout_seconds: 120
 
 paths:
   gold_standards: "./gold-standards"

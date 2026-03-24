@@ -30,6 +30,7 @@ from eval_core.folder_compare.content_diff import ContentComparer
 from eval_core.judges.opus_judge import OpusJudge
 from eval_core.runners.bedrock import BedrockRunner, create_runner
 from eval_core.runners.anthropic_direct import AnthropicDirectRunner, create_direct_runner
+from eval_core.runners.claude_code import ClaudeCodeRunner, create_claude_code_runner
 from eval_core.scoring.scorer import score_action, score_stage, score_template
 from eval_core.scoring.violations import ViolationCatalogue
 from eval_core.types import (
@@ -39,8 +40,10 @@ from eval_core.versioning.run_manager import RunManager
 
 
 def _create_runner_auto(name: str, config: ModelConfig, aws_profile: str = None, api_key: str = None):
-    """Create the appropriate runner based on config. Direct API for Claude, Bedrock for others."""
-    if config.provider == "anthropic-direct":
+    """Create the appropriate runner based on config."""
+    if config.provider == "claude-code":
+        return create_claude_code_runner(name, config)
+    elif config.provider == "anthropic-direct":
         return create_direct_runner(name, config, api_key=api_key)
     else:
         return create_runner(name, config, aws_profile=aws_profile)
