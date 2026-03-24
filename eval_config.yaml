@@ -32,15 +32,19 @@ models:
 
 judges:
   default:
-    model_id: "us.anthropic.claude-opus-4-6-v1"
+    model_id: "moonshotai.kimi-k2.5"
     region: "us-east-1"
     params:
       temperature: 0.0
       max_tokens: 8192
+  # Claude Opus (blocked by INVALID_PAYMENT_INSTRUMENT)
+  # opus:
+  #   model_id: "eu.anthropic.claude-opus-4-6-v1"
+  #   region: "eu-west-1"
 
 teachers:
   default:
-    model_id: "us.anthropic.claude-opus-4-6-v1"
+    model_id: "moonshotai.kimi-k2.5"
     region: "us-east-1"
     params:
       temperature: 0.3

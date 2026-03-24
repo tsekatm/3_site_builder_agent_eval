@@ -37,13 +37,33 @@ from eval_core.types import (
 from eval_core.versioning.run_manager import RunManager
 
 
+INLINE_TEACHER_PROMPT = """You are a prompt engineering expert. An agent just scored poorly on a site customisation action.
+
+## Action that failed: {action_name}
+## Score: {score}/10
+## Violations found:
+{violations}
+
+## Current agent prompt instructions:
+{current_instructions}
+
+## Agent's output (excerpt):
+{agent_output_excerpt}
+
+## Task
+Analyse WHY the agent failed and provide IMPROVED INSTRUCTIONS that would prevent these violations. Return ONLY the improved instruction text — no explanation, no JSON, no markdown blocks. The instruction should be 2-3 sentences that are specific and actionable."""
+
+
 # Prompt template for agent model
-AGENT_PROMPT = """You are a site builder agent. Apply the following modification to the website files.
+AGENT_PROMPT = """You are a site builder agent customising a website template for a client.
+
+## Business Context
+{business_context}
 
 ## Action: {action_name}
 ## Skill: {skill}
 
-## Requirements
+## Requirements for this action
 {description}
 
 ## Current index.html
@@ -56,16 +76,25 @@ AGENT_PROMPT = """You are a site builder agent. Apply the following modification
 {current_css}
 ```
 
-## Instructions
-Apply ONLY the changes described above. Return your response in this EXACT format:
+## CRITICAL RULES
+1. Apply the changes described in the requirements above
+2. For ALL images (hero backgrounds, section backgrounds, logos, icons, gallery):
+   - Use Unsplash for photos: https://images.unsplash.com/photo-ID?w=WIDTH&h=HEIGHT&fit=crop
+   - Use Iconify for icons/logos: https://api.iconify.design/mdi/ICON-NAME.svg?color=%23HEX&width=W&height=H
+   - Choose images that match the business industry
+   - NEVER use local file paths like images/logo.png or assets/images/
+3. Replace ALL {{PLACEHOLDER}} tokens with actual business content
+4. Keep the template structure intact — modify content and styling, don't restructure HTML
+5. Return COMPLETE files, not fragments
+
+## Response Format
+Return your response in this EXACT format (no markdown, no explanation):
 
 ===HTML===
 (the complete modified index.html)
 ===CSS===
 (the complete modified css/styles.css)
-===END===
-
-Return the COMPLETE files, not just the changes. Do not add any explanation."""
+===END==="""
 
 
 def _parse_agent_response(response: str, current_html: str, current_css: str) -> tuple[str, str]:
@@ -147,6 +176,10 @@ async def run_eval_for_template(
     if not action_seq.actions:
         return _error_result(template_name, model_name, "No actions parsed from requirements")
 
+    # Extract business context from requirements (first few sections)
+    req_content = req_path.read_text()
+    business_context = _extract_business_context(req_content)
+
     # Create model output directory
     model_dir = run_dir / template_name / model_name
     model_dir.mkdir(parents=True, exist_ok=True)
@@ -182,6 +215,8 @@ async def run_eval_for_template(
 
     # Run each action sequentially
     action_scores: list[ActionScore] = []
+    learned_instructions: dict[str, str] = {}  # category → improved instructions
+    inline_teacher_threshold = 5.0  # Score below this triggers inline teacher
 
     for action in action_seq.actions:
         if on_progress:
@@ -190,14 +225,18 @@ async def run_eval_for_template(
         action_dir = model_dir / "actions" / f"{action.id:02d}_{action.name}"
         action_dir.mkdir(parents=True, exist_ok=True)
 
-        # Send action to agent model
+        # Build prompt with any learned instructions for this category
+        extra_instructions = learned_instructions.get(action.category, "")
         prompt = AGENT_PROMPT.format(
+            business_context=business_context,
             action_name=action.name,
             skill=action.skill,
             description=action.description,
             current_html=current_html[:30000],
             current_css=current_css[:15000],
         )
+        if extra_instructions:
+            prompt += f"\n\n## IMPORTANT — Learned from previous actions\n{extra_instructions}"
 
         response = await agent_runner.invoke(prompt)
 
@@ -285,6 +324,115 @@ async def run_eval_for_template(
             screenshot_gold="",
             screenshot_agent=str(screenshot_path) if screenshot_path.exists() else "",
         )
+
+        # --- INLINE TEACHER (Option C: refine prompt automatically) ---
+        if action_result.final_score < inline_teacher_threshold and judge_runner:
+            if on_progress:
+                on_progress(model_name, template_name, action.name,
+                            f"score {action_result.final_score:.1f} < {inline_teacher_threshold} — teacher refining prompt")
+
+            violations_text = "\n".join(
+                f"  [{v.severity.value}] {v.id}: {v.description} ({v.deduction})"
+                for v in deduped
+            )
+            teacher_prompt = INLINE_TEACHER_PROMPT.format(
+                action_name=action.name,
+                score=f"{action_result.final_score:.1f}",
+                violations=violations_text,
+                current_instructions=action.description[:2000],
+                agent_output_excerpt=response.output[:2000],
+            )
+
+            teacher_response = await judge_runner.invoke(
+                teacher_prompt,
+                system_prompt="You are a prompt engineering expert. Return only the improved instruction text.",
+            )
+
+            if teacher_response.output and not teacher_response.error:
+                improved = teacher_response.output.strip()
+                # Store learned instruction for this category
+                existing = learned_instructions.get(action.category, "")
+                learned_instructions[action.category] = (
+                    f"{existing}\n{improved}" if existing else improved
+                )
+
+                # Save teacher output for debugging
+                (action_dir / "teacher_refinement.txt").write_text(
+                    f"Score: {action_result.final_score}\n"
+                    f"Category: {action.category}\n"
+                    f"Learned instruction:\n{improved}"
+                )
+
+                if on_progress:
+                    on_progress(model_name, template_name, action.name,
+                                f"teacher refined prompt for category '{action.category}'")
+
+                # RETRY the action with improved prompt
+                retry_prompt = AGENT_PROMPT.format(
+                    business_context=business_context,
+                    action_name=action.name,
+                    skill=action.skill,
+                    description=action.description,
+                    current_html=current_html[:30000],
+                    current_css=current_css[:15000],
+                ) + f"\n\n## IMPORTANT — Learned from previous attempt\n{improved}"
+
+                retry_response = await agent_runner.invoke(retry_prompt)
+
+                if not retry_response.error:
+                    retry_html, retry_css = _parse_agent_response(
+                        retry_response.output, current_html, current_css
+                    )
+
+                    # Re-judge the retry
+                    retry_judge_violations = await judge.evaluate_action(
+                        action.name, action.skill, action.category,
+                        action.description, action.expected_changes,
+                        gold_html, gold_css, retry_html, retry_css,
+                    )
+
+                    retry_auto = ContentComparer(
+                        gold_dir / "index.html", action_dir / "index.html",
+                    ).compare()
+
+                    retry_all = retry_auto + retry_judge_violations
+                    retry_deduped: list[Violation] = []
+                    retry_seen: set[str] = set()
+                    for v in retry_all:
+                        key = f"{v.id}:{v.description[:50]}"
+                        if key not in retry_seen:
+                            retry_seen.add(key)
+                            retry_deduped.append(v)
+
+                    retry_result = score_action(
+                        action.id, action.name, action.skill, action.category,
+                        violations=retry_deduped,
+                        ssim_score=ssim_score,
+                    )
+
+                    # Keep the better score
+                    if retry_result.final_score > action_result.final_score:
+                        if on_progress:
+                            on_progress(model_name, template_name, action.name,
+                                        f"retry improved: {action_result.final_score:.1f} → {retry_result.final_score:.1f}")
+                        action_result = retry_result
+                        new_html, new_css = retry_html, retry_css
+
+                        # Update output files with retry
+                        (action_dir / "index.html").write_text(new_html)
+                        (action_dir / "css" / "styles.css").write_text(new_css)
+                        (action_dir / "raw_response_retry.txt").write_text(retry_response.output)
+
+                        # Re-screenshot
+                        if capture_screenshots:
+                            await _capture_screenshot(action_dir / "index.html", screenshot_path)
+                    else:
+                        if on_progress:
+                            on_progress(model_name, template_name, action.name,
+                                        f"retry didn't improve: {retry_result.final_score:.1f} ≤ {action_result.final_score:.1f}")
+
+        # --- END INLINE TEACHER ---
+
         action_scores.append(action_result)
 
         # Save action score
@@ -323,6 +471,49 @@ async def run_eval_for_template(
     )
 
     return result
+
+
+def _extract_business_context(requirements_text: str) -> str:
+    """Extract business profile and key details from requirements for the agent prompt."""
+    import re
+    lines = []
+
+    # Extract Business Profile section
+    profile_match = re.search(
+        r"## Business Profile\n(.*?)(?=\n## )", requirements_text, re.DOTALL
+    )
+    if profile_match:
+        lines.append(profile_match.group(1).strip())
+
+    # Extract Brand Amendments > Colours
+    colours_match = re.search(
+        r"### Colours\n(.*?)(?=\n### |\n## )", requirements_text, re.DOTALL
+    )
+    if colours_match:
+        lines.append("\nBrand Colours:\n" + colours_match.group(1).strip())
+
+    # Extract Hero Section
+    hero_match = re.search(
+        r"### Hero Section\n(.*?)(?=\n### |\n## )", requirements_text, re.DOTALL
+    )
+    if hero_match:
+        lines.append("\nHero Content:\n" + hero_match.group(1).strip())
+
+    # Extract Contact
+    contact_match = re.search(
+        r"### Contact\n(.*?)(?=\n## )", requirements_text, re.DOTALL
+    )
+    if contact_match:
+        lines.append("\nContact:\n" + contact_match.group(1).strip())
+
+    # Extract About
+    about_match = re.search(
+        r"### About Section\n(.*?)(?=\n### |\n## )", requirements_text, re.DOTALL
+    )
+    if about_match:
+        lines.append("\nAbout:\n" + about_match.group(1).strip())
+
+    return "\n".join(lines) if lines else "No business context available"
 
 
 def _find_template_skeleton(template_name: str, templates_base: Path) -> Optional[Path]:
