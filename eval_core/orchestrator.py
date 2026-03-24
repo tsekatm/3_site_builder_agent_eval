@@ -94,6 +94,11 @@ AGENT_PROMPT = """You are a site builder agent customising a website template fo
    - Use Unsplash for photos: https://images.unsplash.com/photo-ID?w=WIDTH&h=HEIGHT&fit=crop
    - Use Iconify for icons/logos: https://api.iconify.design/mdi/ICON-NAME.svg?color=%23HEX&width=W&height=H
    - Choose images that match the business industry
+3. TEXT CONTRAST ON DARK BACKGROUNDS IS CRITICAL:
+   - Any section with a background image MUST have a dark overlay (rgba(0,0,0,0.6) minimum)
+   - Text on dark backgrounds or background images MUST be white (#FFFFFF) or very light
+   - NEVER use dark text colours (brown, black, dark grey) on sections with background images
+   - Hero sections, CTA sections, and any section with background-image need --text-secondary (#FFFFFF) not --text-color
    - NEVER use local file paths like images/logo.png or assets/images/
 3. Replace ALL {{PLACEHOLDER}} tokens with actual business content
 4. Keep the template structure intact — modify content and styling, don't restructure HTML

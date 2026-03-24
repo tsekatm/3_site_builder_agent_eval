@@ -85,8 +85,12 @@ categories:
         deduction: -0.5
       - id: A11Y-LOW-CONTRAST
         description: Insufficient colour contrast
-        severity: moderate
-        deduction: -0.5
+        severity: major
+        deduction: -1.5
+      - id: A11Y-DARK-TEXT-ON-DARK-BG
+        description: Dark text on dark background or background image (unreadable)
+        severity: critical
+        deduction: -2.0
       - id: A11Y-MISSING-ARIA
         description: Missing ARIA labels
         severity: minor
