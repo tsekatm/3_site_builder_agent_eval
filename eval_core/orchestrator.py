@@ -226,7 +226,7 @@ async def run_eval_for_template(
     # Run each action sequentially
     action_scores: list[ActionScore] = []
     learned_instructions: dict[str, str] = {}  # category → improved instructions
-    inline_teacher_threshold = 5.0  # Score below this triggers inline teacher
+    inline_teacher_threshold = 7.0  # Score below this triggers inline teacher
 
     for action in action_seq.actions:
         if on_progress:
