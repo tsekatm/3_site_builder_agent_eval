@@ -29,12 +29,21 @@ from eval_core.folder_compare.tree_diff import FolderComparer
 from eval_core.folder_compare.content_diff import ContentComparer
 from eval_core.judges.opus_judge import OpusJudge
 from eval_core.runners.bedrock import BedrockRunner, create_runner
+from eval_core.runners.anthropic_direct import AnthropicDirectRunner, create_direct_runner
 from eval_core.scoring.scorer import score_action, score_stage, score_template
 from eval_core.scoring.violations import ViolationCatalogue
 from eval_core.types import (
     ActionScore, StageScore, TemplateResult, Violation, Severity, RunnerResponse,
 )
 from eval_core.versioning.run_manager import RunManager
+
+
+def _create_runner_auto(name: str, config: ModelConfig, aws_profile: str = None, api_key: str = None):
+    """Create the appropriate runner based on config. Direct API for Claude, Bedrock for others."""
+    if config.provider == "anthropic-direct":
+        return create_direct_runner(name, config, api_key=api_key)
+    else:
+        return create_runner(name, config, aws_profile=aws_profile)
 
 
 INLINE_TEACHER_PROMPT = """You are a prompt engineering expert. An agent just scored poorly on a site customisation action.
@@ -140,6 +149,7 @@ async def run_eval_for_template(
     config: EvalConfig,
     run_dir: Path,
     aws_profile: Optional[str] = None,
+    api_key: Optional[str] = None,
     on_progress: Optional[Callable] = None,
     capture_screenshots: bool = True,
 ) -> TemplateResult:
@@ -207,9 +217,9 @@ async def run_eval_for_template(
         gold_css = css_path.read_text()
         break
 
-    # Create runners
-    agent_runner = create_runner(model_name, model_config, aws_profile)
-    judge_runner = create_runner("judge", judge_config, aws_profile)
+    # Create runners (auto-detect: direct API for Claude, Bedrock for others)
+    agent_runner = _create_runner_auto(model_name, model_config, aws_profile, api_key)
+    judge_runner = _create_runner_auto("judge", judge_config, aws_profile, api_key)
     catalogue = ViolationCatalogue(Path(config.paths.violations))
     judge = OpusJudge(runner=judge_runner, violation_catalogue_yaml=catalogue.as_yaml_string())
 

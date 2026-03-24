@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 class ModelConfig(BaseModel):
     model_id: str
     region: str = "us-east-1"
+    provider: str = "bedrock"  # "bedrock" or "anthropic-direct"
     params: dict = Field(default_factory=dict)
     tags: list[str] = Field(default_factory=list)
     converse_api: bool = True
