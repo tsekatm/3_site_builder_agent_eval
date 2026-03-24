@@ -339,13 +339,13 @@ Agents currently run on Claude SDK. Configurable routing to Bedrock models.
 | 8.12 | CLI commands | COMPLETE | — |
 | 8.13 | Integration testing | COMPLETE (100 unit tests) | — |
 | | | | |
-| **9** | **Execute: Tier 1 — Eval Run** | PENDING | [View](stage-9-tier1-execution.md) |
-| 9.1 | Baseline eval run (all models, all templates, all 3 stages) | PENDING | — |
-| 9.2 | Present baseline results for verification | PENDING | — |
-| 9.3 | Refinement loop (teacher generates skill diffs) | PENDING | — |
-| 9.4 | Present diffs for HITL accept/reject | PENDING | — |
-| 9.5 | Apply changes & re-run | PENDING | — |
-| 9.6 | Present refined results for verification | PENDING | — |
+| **9** | **Execute: Tier 1 — Eval Run** | **COMPLETE** | [View](stage-9-tier1-execution.md) |
+| 9.1 | Baseline eval run (DeepSeek V3.2 x template-ai-page-builder) | COMPLETE | — |
+| 9.2 | Present baseline results for verification | COMPLETE | — |
+| 9.3 | Inline teacher refinement (threshold 7.0, Claude Opus judge) | COMPLETE | — |
+| 9.4 | Present results for HITL review | COMPLETE | — |
+| 9.5 | Best run: 101.2/160 (12/16 actions at 7.0+) | COMPLETE | — |
+| 9.6 | Screenshots captured (18 per run) | COMPLETE | — |
 | | | | |
 | **10** | **HITL: Tier 1 Results Review** | PENDING | [View](stage-10-hitl-tier1-results.md) |
 | 10.1 | Full evaluation report | PENDING | — |
