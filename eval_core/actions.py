@@ -94,6 +94,11 @@ SECTION_TO_ACTION: dict[str, dict] = {
         "skill": "cross-cutting",
         "category": "accessibility",
     },
+    "Interactivity": {
+        "name": "add-interactivity",
+        "skill": "template_customization",
+        "category": "interactivity",
+    },
 }
 
 

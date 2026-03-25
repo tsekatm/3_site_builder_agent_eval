@@ -124,6 +124,33 @@ categories:
         severity: minor
         deduction: -0.25
 
+  interactivity:
+    violations:
+      - id: INT-NO-MOBILE-MENU
+        description: No mobile hamburger menu toggle (site unusable on mobile)
+        severity: critical
+        deduction: -2.5
+      - id: INT-NO-SMOOTH-SCROLL
+        description: No smooth scroll for anchor links
+        severity: moderate
+        deduction: -0.5
+      - id: INT-NO-HOVER-STATES
+        description: No hover effects on cards, buttons, or links
+        severity: major
+        deduction: -1.0
+      - id: INT-NO-JS-FUNCTIONALITY
+        description: Interactive elements present in HTML but no JavaScript to make them work
+        severity: critical
+        deduction: -2.0
+      - id: INT-BROKEN-JS
+        description: JavaScript present but throws errors or doesn't execute
+        severity: major
+        deduction: -1.5
+      - id: INT-NO-SCROLL-ANIMATIONS
+        description: No reveal-on-scroll or entrance animations
+        severity: minor
+        deduction: -0.25
+
   performance:
     violations:
       - id: PERF-LARGE-IMAGE

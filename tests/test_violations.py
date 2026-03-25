@@ -14,7 +14,7 @@ class TestViolationCatalogue:
 
     def test_has_all_categories(self, violations_yaml_path):
         cat = ViolationCatalogue(violations_yaml_path)
-        expected = {"structural", "visual", "content", "code_quality", "accessibility", "performance"}
+        expected = {"structural", "visual", "content", "code_quality", "accessibility", "performance", "interactivity"}
         assert set(cat.categories()) == expected
 
     def test_get_by_id(self, violations_yaml_path):
@@ -22,7 +22,7 @@ class TestViolationCatalogue:
         v = cat.get("STRUCT-MISSING-INDEX")
         assert v is not None
         assert v.severity == Severity.CRITICAL
-        assert v.deduction == -3.0
+        assert v.deduction == -5.0
 
     def test_get_nonexistent(self, violations_yaml_path):
         cat = ViolationCatalogue(violations_yaml_path)
@@ -31,7 +31,7 @@ class TestViolationCatalogue:
     def test_by_category(self, violations_yaml_path):
         cat = ViolationCatalogue(violations_yaml_path)
         structural = cat.by_category("structural")
-        assert len(structural) == 4
+        assert len(structural) == 5
 
     def test_as_yaml_string(self, violations_yaml_path):
         cat = ViolationCatalogue(violations_yaml_path)

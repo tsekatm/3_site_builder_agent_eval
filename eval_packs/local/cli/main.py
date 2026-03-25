@@ -191,6 +191,75 @@ def history(ctx, template, model, limit):
     console.print(table)
 
 
+@cli.command()
+@click.option("--template", "-t", default="all", help="Template name(s) or 'all' (processes in catalogue order)")
+@click.option("--model", "-m", default="all", help="Model name(s) or 'all'")
+@click.option("--target-score", type=float, default=8.0, help="Target average action score")
+@click.option("--max-iterations", type=int, default=3, help="Max improvement cycles per template")
+@click.option("--skills-dir", required=True, help="Path to skills directory to update")
+@click.pass_context
+def improve(ctx, template, model, target_score, max_iterations, skills_dir):
+    """Continuous improvement loop — eval, extract patterns, update skills, re-run."""
+    import asyncio
+    from eval_core.continuous import ContinuousImprover
+
+    config: EvalConfig = ctx.obj["config"]
+    models_dict = get_enabled_models(config, names=model)
+
+    if not models_dict:
+        console.print("[red]No models matched.[/red]")
+        raise SystemExit(1)
+
+    # Resolve templates in catalogue order
+    gold_dir = Path(config.paths.gold_standards)
+    if template == "all":
+        templates = sorted([
+            d.name for d in gold_dir.iterdir()
+            if d.is_dir() and d.name.startswith("template-")
+            and (d / "requirements.md").exists()
+        ])
+    else:
+        templates = [t.strip() for t in template.split(",")]
+
+    def progress(model_name, tmpl, action, status):
+        console.print(f"  [{model_name}] {tmpl} > {action}: {status}")
+
+    improver = ContinuousImprover(
+        config=config,
+        skills_dir=Path(skills_dir),
+        aws_profile="Tebogo-dev",
+        on_progress=progress,
+    )
+
+    async def run_loop():
+        for tmpl in templates:
+            console.print(f"\n[bold green]{'='*60}[/bold green]")
+            console.print(f"[bold green]IMPROVING: {tmpl}[/bold green]")
+            console.print(f"[bold green]Target: {target_score}/10 avg | Max iterations: {max_iterations}[/bold green]")
+            console.print(f"[bold green]{'='*60}[/bold green]\n")
+
+            result = await improver.improve(
+                template=tmpl,
+                models=list(models_dict.keys()),
+                target_score=target_score,
+                max_iterations=max_iterations,
+            )
+
+            console.print(f"\n[bold]{'='*60}[/bold]")
+            console.print(f"[bold]RESULT: {tmpl}[/bold]")
+            console.print(f"  Iterations: {result['iterations']}")
+            console.print(f"  Target met: {result['target_met']}")
+            console.print(f"  Skill changes applied: {len(result['skill_changes'])}")
+            for sc in result['skill_changes']:
+                console.print(f"    - {sc['skill']}: {sc['changes']} changes (iter {sc['iteration']})")
+            console.print(f"  Final scores:")
+            for m, scores in result['final_scores'].items():
+                console.print(f"    {m}: {scores['total']:.1f} (avg {scores['average']:.1f})")
+            console.print(f"[bold]{'='*60}[/bold]\n")
+
+    asyncio.run(run_loop())
+
+
 def _show_dry_run(models, templates, template_actions, stage):
     """Display what would be executed without running."""
     console.print("\n[cyan]DRY RUN — no API calls will be made[/cyan]\n")

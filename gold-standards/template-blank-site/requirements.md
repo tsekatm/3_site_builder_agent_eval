@@ -160,3 +160,29 @@
 ## Deployment
 - **Staging URL Pattern**: `https://dev.cloudnest-digital.preview.example.com`
 - **S3 Prefix**: `staging/cloudnest-digital/`
+
+## Interactivity Requirements
+
+### Mobile Menu
+- **Hamburger toggle**: Visible below 768px, toggles nav with aria-expanded
+- **Animation**: Smooth slide or fade transition
+
+### Scroll Behavior
+- **Smooth scroll**: All anchor links scroll smoothly to target
+- **Scroll indicator**: "Scroll to explore" or down-arrow on hero (optional)
+
+### Hover States
+- **Buttons**: Scale up slightly (transform: scale(1.02)) with shadow on hover
+- **Cards**: Lift effect (translateY(-4px)) with shadow transition
+- **Links**: Colour change or underline on hover
+- **Nav items**: Subtle colour/opacity change
+
+### Card Interactions
+- **Feature cards**: Hover lift effect with shadow
+- **Testimonial cards**: Subtle border or shadow change on hover
+- **Gallery items**: Overlay with zoom icon on hover (if gallery present)
+
+### Animations
+- **Hero**: Parallax scroll on background image (respect prefers-reduced-motion)
+- **Sections**: Fade-in on scroll (IntersectionObserver)
+- **prefers-reduced-motion**: Disable all animations when user prefers reduced motion
