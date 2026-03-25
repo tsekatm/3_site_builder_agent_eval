@@ -4,7 +4,7 @@ categories:
       - id: STRUCT-MISSING-INDEX
         description: Missing required file (index.html)
         severity: critical
-        deduction: -3.0
+        deduction: -5.0
       - id: STRUCT-MISSING-ASSET
         description: Missing asset file referenced in HTML
         severity: major
@@ -17,6 +17,10 @@ categories:
         description: Extra/unexpected files
         severity: minor
         deduction: -0.25
+      - id: STRUCT-EMPTY-SECTION
+        description: Section exists in HTML but has no visible content (empty/blank)
+        severity: critical
+        deduction: -3.0
 
   visual:
     violations:
@@ -36,6 +40,14 @@ categories:
         description: Colour mismatch vs reference
         severity: moderate
         deduction: -0.5
+      - id: VIS-BROKEN-IMAGE
+        description: Image shows alt text or broken placeholder instead of actual image
+        severity: critical
+        deduction: -2.5
+      - id: VIS-WRONG-IMAGE
+        description: Image loads but does not match business industry/context
+        severity: major
+        deduction: -1.5
 
   content:
     violations:
@@ -50,11 +62,19 @@ categories:
       - id: CONTENT-PLACEHOLDER
         description: Placeholder text not replaced
         severity: major
-        deduction: -1.0
+        deduction: -1.5
       - id: CONTENT-MISSING-META
         description: Missing meta tags
         severity: minor
         deduction: -0.25
+      - id: CONTENT-SECTION-MISSING
+        description: Entire section from requirements not present in output
+        severity: critical
+        deduction: -3.0
+      - id: CONTENT-PARAPHRASED
+        description: Content paraphrased instead of using exact text from requirements
+        severity: moderate
+        deduction: -0.5
 
   code_quality:
     violations:
@@ -76,6 +96,10 @@ categories:
         description: No responsive breakpoints
         severity: major
         deduction: -1.5
+      - id: CODE-LOCAL-FILE-PATH
+        description: Using local filesystem path instead of working URL for image/asset
+        severity: critical
+        deduction: -2.0
 
   accessibility:
     violations:
@@ -90,7 +114,7 @@ categories:
       - id: A11Y-DARK-TEXT-ON-DARK-BG
         description: Dark text on dark background or background image (unreadable)
         severity: critical
-        deduction: -2.0
+        deduction: -3.0
       - id: A11Y-MISSING-ARIA
         description: Missing ARIA labels
         severity: minor
