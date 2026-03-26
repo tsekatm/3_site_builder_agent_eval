@@ -1,4 +1,13 @@
 models:
+  claude-haiku:
+    model_id: "claude-haiku"
+    provider: "claude-code"
+    params:
+      cli_model: "haiku"
+      timeout_seconds: 300
+    tags: ["code-gen", "fast"]
+    enabled: true
+
   deepseek-r1:
     model_id: "us.deepseek.r1-v1:0"
     region: "us-east-1"
@@ -8,7 +17,7 @@ models:
     tags: ["reasoning", "code-gen"]
     converse_api: false
     strip_think_blocks: true
-    enabled: true
+    enabled: false  # Bedrock access revoked
 
   deepseek-v3.2:
     model_id: "deepseek.v3.2"
@@ -18,7 +27,7 @@ models:
       max_tokens: 8192
     tags: ["code-gen", "fast"]
     converse_api: true
-    enabled: true
+    enabled: false  # Bedrock access revoked
 
   kimi-k2.5:
     model_id: "moonshotai.kimi-k2.5"
@@ -28,7 +37,7 @@ models:
       max_tokens: 16384
     tags: ["multimodal", "code-gen"]
     converse_api: true
-    enabled: true
+    enabled: false  # Bedrock access revoked
 
 judges:
   default:

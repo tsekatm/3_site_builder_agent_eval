@@ -30,9 +30,9 @@ class TestCLI:
         assert "DRY RUN" in result.output
 
     def test_run_dry_run_single_model(self, runner):
-        result = runner.invoke(cli, ["run", "--dry-run", "--model", "deepseek-r1"])
+        result = runner.invoke(cli, ["run", "--dry-run", "--model", "claude-haiku"])
         assert result.exit_code == 0
-        assert "deepseek-r1" in result.output
+        assert "claude-haiku" in result.output
 
     def test_run_dry_run_single_template(self, runner):
         result = runner.invoke(cli, ["run", "--dry-run", "--template", "template-ai-page-builder"])
@@ -73,7 +73,7 @@ class TestCLI:
         # Use --dry-run to avoid actual API calls
         result = runner.invoke(cli, [
             "run", "--dry-run",
-            "--model", "deepseek-r1",
+            "--model", "claude-haiku",
             "--template", "template-ai-page-builder",
         ])
         assert result.exit_code == 0
