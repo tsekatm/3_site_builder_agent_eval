@@ -31,6 +31,7 @@ from eval_core.judges.opus_judge import OpusJudge
 from eval_core.runners.bedrock import BedrockRunner, create_runner
 from eval_core.runners.anthropic_direct import AnthropicDirectRunner, create_direct_runner
 from eval_core.runners.claude_code import ClaudeCodeRunner, create_claude_code_runner
+from eval_core.runners.openrouter import OpenRouterRunner, create_openrouter_runner
 from eval_core.scoring.scorer import score_action, score_stage, score_template
 from eval_core.scoring.violations import ViolationCatalogue
 from eval_core.types import (
@@ -45,6 +46,8 @@ def _create_runner_auto(name: str, config: ModelConfig, aws_profile: str = None,
         return create_claude_code_runner(name, config)
     elif config.provider == "anthropic-direct":
         return create_direct_runner(name, config, api_key=api_key)
+    elif config.provider == "openrouter":
+        return create_openrouter_runner(name, config)
     else:
         return create_runner(name, config, aws_profile=aws_profile)
 

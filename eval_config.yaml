@@ -9,35 +9,35 @@ models:
     enabled: true
 
   deepseek-r1:
-    model_id: "us.deepseek.r1-v1:0"
-    region: "us-east-1"
+    model_id: "deepseek/deepseek-r1-0528"
+    provider: "openrouter"
     params:
       temperature: 0.3
       max_tokens: 8192
+      timeout_seconds: 600
     tags: ["reasoning", "code-gen"]
-    converse_api: false
     strip_think_blocks: true
-    enabled: false  # Bedrock access revoked
+    enabled: false  # Dropped from eval (too slow, no tool calling)
 
   deepseek-v3.2:
-    model_id: "deepseek.v3.2"
-    region: "us-east-1"
+    model_id: "deepseek/deepseek-v3.2"
+    provider: "openrouter"
     params:
       temperature: 0.2
       max_tokens: 8192
+      timeout_seconds: 600
     tags: ["code-gen", "fast"]
-    converse_api: true
-    enabled: false  # Bedrock access revoked
+    enabled: true
 
   kimi-k2.5:
-    model_id: "moonshotai.kimi-k2.5"
-    region: "us-east-1"
+    model_id: "moonshotai/kimi-k2.5"
+    provider: "openrouter"
     params:
       temperature: 0.2
       max_tokens: 16384
+      timeout_seconds: 600
     tags: ["multimodal", "code-gen"]
-    converse_api: true
-    enabled: false  # Bedrock access revoked
+    enabled: true
 
 judges:
   default:
