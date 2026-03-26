@@ -27,6 +27,7 @@ from eval_core.actions import parse_requirements_to_actions, EvalAction
 from eval_core.config import EvalConfig, ModelConfig
 from eval_core.folder_compare.tree_diff import FolderComparer
 from eval_core.folder_compare.content_diff import ContentComparer
+from eval_core.visual.html_visual_checker import HTMLVisualChecker
 from eval_core.judges.opus_judge import OpusJudge
 from eval_core.runners.bedrock import BedrockRunner, create_runner
 from eval_core.runners.anthropic_direct import AnthropicDirectRunner, create_direct_runner
@@ -336,6 +337,11 @@ async def run_eval_for_template(
             action_dir / "index.html",
         )
         auto_violations.extend(content_comparer.compare())
+
+        # Visual checks (catches broken images, empty sections, contrast, broken nav, missing JS)
+        css_path = action_dir / "css" / "styles.css"
+        visual_checker = HTMLVisualChecker(action_dir / "index.html", css_path if css_path.exists() else None)
+        auto_violations.extend(visual_checker.check_all())
 
         # Judge evaluation
         judge_violations = await judge.evaluate_action(
