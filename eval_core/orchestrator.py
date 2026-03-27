@@ -29,6 +29,7 @@ from eval_core.folder_compare.tree_diff import FolderComparer
 from eval_core.folder_compare.content_diff import ContentComparer
 from eval_core.visual.html_visual_checker import HTMLVisualChecker
 from eval_core.judges.opus_judge import OpusJudge
+from eval_core.judges.visual_judge import VisualJudge
 from eval_core.runners.bedrock import BedrockRunner, create_runner
 from eval_core.runners.anthropic_direct import AnthropicDirectRunner, create_direct_runner
 from eval_core.runners.claude_code import ClaudeCodeRunner, create_claude_code_runner
@@ -258,6 +259,22 @@ async def run_eval_for_template(
     catalogue = ViolationCatalogue(Path(config.paths.violations))
     judge = OpusJudge(runner=judge_runner, violation_catalogue_yaml=catalogue.as_yaml_string())
 
+    # Create visual judge (uses OpenRouter with vision)
+    import os
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY", "")
+    visual_judge = VisualJudge(api_key=openrouter_key) if openrouter_key else None
+
+    # Read requirements summary for visual judge
+    req_summary = ""
+    if req_path.exists():
+        req_text = req_path.read_text()
+        # Extract business profile + brand section for visual context
+        for section in ["Business Profile", "Brand Amendments", "Hero Section"]:
+            import re as _re
+            match = _re.search(rf"## {section}\n(.*?)(?=\n## |\Z)", req_text, _re.DOTALL)
+            if match:
+                req_summary += f"\n{section}:\n{match.group(1).strip()}\n"
+
     # Run each action sequentially
     action_scores: list[ActionScore] = []
     learned_instructions: dict[str, str] = {}  # category → improved instructions
@@ -356,8 +373,34 @@ async def run_eval_for_template(
             agent_css=new_css,
         )
 
+        # Visual judge (screenshot comparison via OpenRouter vision)
+        visual_judge_violations: list[Violation] = []
+        if visual_judge and capture_screenshots and screenshot_path.exists():
+            gold_screenshot = gold_dir / "screenshots" / f"{action.id:02d}_{action.name}.png"
+            if not gold_screenshot.exists():
+                # Fall back to gold final screenshot
+                gold_screenshot = gold_dir / "screenshots" / "final.png"
+            # Use the gold standard HTML screenshot as reference if no dedicated screenshot
+            if not gold_screenshot.exists() and (baseline_dir / "screenshot.png").exists():
+                gold_screenshot = baseline_dir / "screenshot.png"
+
+            if gold_screenshot.exists():
+                vj_violations, vj_score = await visual_judge.evaluate(
+                    gold_screenshot=gold_screenshot,
+                    agent_screenshot=screenshot_path,
+                    action_name=action.name,
+                    action_description=action.description[:300],
+                    requirements_summary=req_summary,
+                )
+                visual_judge_violations = vj_violations
+                ssim_score = vj_score / 10.0  # Normalize to 0-1
+
+                if on_progress and vj_violations:
+                    on_progress(model_name, template_name, action.name,
+                                f"visual judge: {len(vj_violations)} issues (score {vj_score:.0f}/10)")
+
         # Combine all violations (dedup by id)
-        all_violations = auto_violations + judge_violations + ssim_violations
+        all_violations = auto_violations + judge_violations + ssim_violations + visual_judge_violations
         seen_ids: set[str] = set()
         deduped: list[Violation] = []
         for v in all_violations:
