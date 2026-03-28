@@ -39,16 +39,19 @@ class OpenRouterRunner(BaseRunner):
 
     async def invoke(
         self,
-        prompt: str,
+        prompt: str | list,
         system_prompt: str = "",
         params: dict | None = None,
     ) -> RunnerResponse:
+        """Invoke the model. prompt can be a string or a list of content
+        blocks (multipart) for vision models."""
         merged = {**self._config.params, **(params or {})}
         start = time.monotonic()
 
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
+        # Support both str and list (multipart vision content)
         messages.append({"role": "user", "content": prompt})
 
         body = {
