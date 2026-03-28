@@ -600,6 +600,34 @@ class FigmaDesignExtractor:
         typography_styles = self._extract_inline_typography(file_data)
         gradients = self._extract_gradients(file_data)
 
+        # Detect small icon frames (vector components without IMAGE fills)
+        # These need to be exported as PNG since they aren't in image_fills
+        image_node_id_set = {img["node_id"] for img in images}
+        icon_frames = []
+        for child in target.get("children", []):
+            cid = child.get("id", "")
+            ctype = child.get("type", "")
+            bbox_c = child.get("absoluteBoundingBox", {})
+            w = bbox_c.get("width", 0)
+            h = bbox_c.get("height", 0)
+            # Small frames/components that aren't already in image_fills
+            if (ctype in ("FRAME", "COMPONENT", "INSTANCE", "GROUP")
+                    and w < 120 and h < 120 and w > 20 and h > 20
+                    and cid not in image_node_id_set):
+                icon_frames.append({
+                    "node_id": cid,
+                    "node_name": child.get("name", "icon"),
+                    "parent_section": target.get("name", "root"),
+                    "parent_id": target.get("id", ""),
+                    "image_ref": "",
+                    "x": bbox_c.get("x", 0),
+                    "y": bbox_c.get("y", 0),
+                    "width": w,
+                    "height": h,
+                    "is_icon_frame": True,
+                })
+        images.extend(icon_frames)
+
         # Export images (batch all node IDs in one call)
         image_node_ids = [img["node_id"] for img in images if img.get("node_id")]
         if image_node_ids:
