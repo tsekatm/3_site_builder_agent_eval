@@ -195,7 +195,9 @@ def detect_sections(frames: list[dict], texts: list[dict],
 
     # If many small top-level children (flat design), cluster by Y position
     if len(top_level_frames) > 15:
-        return _detect_from_flat_design(top_level_frames, frames, texts, images, target_node)
+        sections = _detect_from_flat_design(top_level_frames, frames, texts, images, target_node)
+        return _absorb_tiny_sections(sections)
+    # Note: _absorb_tiny_sections is also called at the end for non-flat designs
 
     # If we have no top-level frames, fallback
     if not top_level_frames:
@@ -290,7 +292,7 @@ def detect_sections(frames: list[dict], texts: list[dict],
                 else:
                     best_section.images.append(item)
 
-    return sections
+    return _absorb_tiny_sections(sections)
 
 
 def _get_descendant_ids(parent_id: str, frames: list[dict]) -> set[str]:
@@ -306,6 +308,52 @@ def _get_descendant_ids(parent_id: str, frames: list[dict]) -> set[str]:
                     descendants.add(fid)
                     queue.append(fid)
     return descendants
+
+
+def _absorb_tiny_sections(sections: list[Section]) -> list[Section]:
+    """Absorb tiny sections (< 150px tall, few items) into the nearest larger section.
+
+    Flat Figma designs often have small groups (CTAs, icon frames) that
+    shouldn't be their own page sections. Merge their content into the
+    nearest substantial section.
+    """
+    if len(sections) < 2:
+        return sections
+
+    substantial = []
+    tiny = []
+    for s in sections:
+        # Keep sections that have real content or are large enough
+        has_images = len(s.images) > 0 and any(
+            img.get("width", 0) > 200 for img in s.images
+        )
+        is_large = s.height > 150
+        has_many_texts = len(s.texts) >= 3
+        is_footer = s.semantic_role == "footer"
+
+        if is_large or has_images or has_many_texts or is_footer:
+            substantial.append(s)
+        else:
+            tiny.append(s)
+
+    if not tiny:
+        return sections
+
+    # Absorb each tiny section into the nearest substantial section by Y
+    for t in tiny:
+        best = None
+        best_dist = float("inf")
+        for s in substantial:
+            dist = abs(t.y_position - s.y_position)
+            if dist < best_dist:
+                best_dist = dist
+                best = s
+        if best:
+            best.texts.extend(t.texts)
+            best.images.extend(t.images)
+            best.texts.sort(key=lambda x: (x.get("y", 0), x.get("x", 0)))
+
+    return substantial
 
 
 def _cluster_into_sections(frames: list[dict], target_node: dict) -> list[dict]:
