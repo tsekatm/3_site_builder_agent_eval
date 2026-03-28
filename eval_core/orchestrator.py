@@ -254,14 +254,16 @@ async def run_eval_for_template(
         gold_css = css_path.read_text()
         break
 
-    # Create runners (auto-detect: direct API for Claude, Bedrock for others)
-    agent_runner = _create_runner_auto(model_name, model_config, aws_profile, api_key)
-    judge_runner = _create_runner_auto("judge", judge_config, aws_profile, api_key)
-
     # Multi-model router (if model_name is "routed", use per-action routing)
     router = None
     if model_name == "routed":
         router = ModelRouter(models=config.models)
+        agent_runner = None  # Runner created per-action by the router
+    else:
+        agent_runner = _create_runner_auto(model_name, model_config, aws_profile, api_key)
+
+    # Create judge runner
+    judge_runner = _create_runner_auto("judge", judge_config, aws_profile, api_key)
     catalogue = ViolationCatalogue(Path(config.paths.violations))
     judge = OpusJudge(runner=judge_runner, violation_catalogue_yaml=catalogue.as_yaml_string())
 
@@ -485,7 +487,7 @@ async def run_eval_for_template(
                     current_css=current_css[:15000],
                 ) + f"\n\n## IMPORTANT — Learned from previous attempt\n{improved}"
 
-                retry_response = await agent_runner.invoke(retry_prompt)
+                retry_response = await current_runner.invoke(retry_prompt)
 
                 if not retry_response.error:
                     retry_html, retry_css = _parse_agent_response(
