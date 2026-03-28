@@ -240,11 +240,17 @@ Return the complete single-file HTML (with <style> and <script> inline):
                 parent = img.get("parent_section", "")
 
                 if url:
-                    # Determine image role
+                    # Determine image role based on size and section context
                     if w > 1000:
                         role = "background-image (full width)"
                     elif w > 400:
                         role = "card/feature image"
+                    elif section.semantic_role == "navigation":
+                        role = "LOGO — place in navigation bar"
+                    elif section.semantic_role == "footer":
+                        role = "footer logo/icon"
+                    elif section.semantic_role == "stats":
+                        role = "stats icon — display in circular container"
                     else:
                         role = "icon/thumbnail"
                     lines.append(f"  - {name}: {url} ({w}x{h}, {role})")
