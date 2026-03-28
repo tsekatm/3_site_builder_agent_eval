@@ -229,6 +229,26 @@ class FigmaDesignExtractor:
                     elif fill.get("type") == "IMAGE":
                         has_bg_image = True
 
+                # If no fill on the group/frame, check first child RECTANGLE
+                # (designers often use a bg rectangle as the first child)
+                if not bg_colour and not has_bg_image:
+                    for gc in child.get("children", [])[:3]:
+                        if gc.get("type") == "RECTANGLE":
+                            for fill in gc.get("fills", []):
+                                if not fill.get("visible", True):
+                                    continue
+                                if fill.get("type") == "SOLID":
+                                    c = fill.get("color", {})
+                                    r = round(c.get("r", 0) * 255)
+                                    g = round(c.get("g", 0) * 255)
+                                    b = round(c.get("b", 0) * 255)
+                                    a = c.get("a", 1.0)
+                                    bg_colour = f"#{r:02x}{g:02x}{b:02x}" if a >= 1.0 else f"rgba({r},{g},{b},{a:.2f})"
+                                elif fill.get("type") == "IMAGE":
+                                    has_bg_image = True
+                            if bg_colour or has_bg_image:
+                                break
+
                 box_shadow = None
                 for effect in child.get("effects", []):
                     if effect.get("type") == "DROP_SHADOW" and effect.get("visible", True):
@@ -600,32 +620,55 @@ class FigmaDesignExtractor:
         typography_styles = self._extract_inline_typography(file_data)
         gradients = self._extract_gradients(file_data)
 
-        # Detect small icon frames (vector components without IMAGE fills)
+        # Detect small icon/logo frames (vector components without IMAGE fills)
         # These need to be exported as PNG since they aren't in image_fills
         image_node_id_set = {img["node_id"] for img in images}
         icon_frames = []
-        for child in target.get("children", []):
-            cid = child.get("id", "")
-            ctype = child.get("type", "")
-            bbox_c = child.get("absoluteBoundingBox", {})
-            w = bbox_c.get("width", 0)
-            h = bbox_c.get("height", 0)
-            # Small frames/components that aren't already in image_fills
-            if (ctype in ("FRAME", "COMPONENT", "INSTANCE", "GROUP")
-                    and w < 120 and h < 120 and w > 20 and h > 20
-                    and cid not in image_node_id_set):
-                icon_frames.append({
-                    "node_id": cid,
-                    "node_name": child.get("name", "icon"),
-                    "parent_section": target.get("name", "root"),
-                    "parent_id": target.get("id", ""),
-                    "image_ref": "",
-                    "x": bbox_c.get("x", 0),
-                    "y": bbox_c.get("y", 0),
-                    "width": w,
-                    "height": h,
-                    "is_icon_frame": True,
-                })
+
+        def _find_icon_frames(node: dict, parent_name: str, parent_id: str):
+            """Recursively find small frames that should be exported as icons."""
+            for child in node.get("children", []):
+                cid = child.get("id", "")
+                ctype = child.get("type", "")
+                cname = child.get("name", "")
+                bbox_c = child.get("absoluteBoundingBox", {})
+                w = bbox_c.get("width", 0)
+                h = bbox_c.get("height", 0)
+
+                if cid in image_node_id_set:
+                    continue
+
+                # Export criteria: small frames/groups that look like icons or logos
+                is_icon = (ctype in ("FRAME", "COMPONENT", "INSTANCE")
+                           and w < 120 and h < 120 and w > 20 and h > 20)
+                is_logo = (ctype in ("GROUP", "FRAME")
+                           and 100 < max(w, h) < 200
+                           and cname.lower().startswith(("group", "logo", "brand")))
+                is_social = ("social" in cname.lower() or "facebook" in cname.lower()
+                             or "instagram" in cname.lower() or "youtube" in cname.lower()
+                             or "twitter" in cname.lower())
+
+                if is_icon or (is_social and w < 80) or is_logo:
+                    icon_frames.append({
+                        "node_id": cid,
+                        "node_name": cname or "icon",
+                        "parent_section": parent_name,
+                        "parent_id": parent_id,
+                        "image_ref": "",
+                        "x": bbox_c.get("x", 0),
+                        "y": bbox_c.get("y", 0),
+                        "width": w,
+                        "height": h,
+                        "is_icon_frame": True,
+                    })
+                    image_node_id_set.add(cid)
+                elif ctype in ("GROUP", "FRAME", "SECTION"):
+                    # Recurse into groups to find nested icons
+                    ctx_name = cname if cname else parent_name
+                    ctx_id = cid if cid else parent_id
+                    _find_icon_frames(child, ctx_name, ctx_id)
+
+        _find_icon_frames(target, target.get("name", "root"), target.get("id", ""))
         images.extend(icon_frames)
 
         # Export images (batch all node IDs in one call)
