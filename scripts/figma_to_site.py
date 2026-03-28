@@ -73,19 +73,36 @@ def call_claude(prompt: str, system: str, model: str = "sonnet") -> dict:
 
 
 def parse_html(content: str) -> str:
-    """Extract HTML from model response."""
+    """Extract HTML from model response, stripping all markdown artifacts."""
     if "===HTML===" in content:
         html = content.split("===HTML===")[1]
         if "===END===" in html:
             html = html.split("===END===")[0]
-        return html.strip()
+        return _clean_html(html)
     if "```html" in content:
-        return content.split("```html")[1].split("```")[0].strip()
+        html = content.split("```html")[1].split("```")[0]
+        return _clean_html(html)
     if "<!DOCTYPE" in content:
-        return content[content.find("<!DOCTYPE"):].strip()
+        html = content[content.find("<!DOCTYPE"):]
+        return _clean_html(html)
     if "<html" in content:
-        return content[content.find("<html"):].strip()
-    return content
+        html = content[content.find("<html"):]
+        return _clean_html(html)
+    return _clean_html(content)
+
+
+def _clean_html(html: str) -> str:
+    """Strip markdown backticks and artifacts from top and bottom."""
+    html = html.strip()
+    # Strip leading ```html or ```
+    if html.startswith("```html"):
+        html = html[7:]
+    elif html.startswith("```"):
+        html = html[3:]
+    # Strip trailing ```
+    if html.endswith("```"):
+        html = html[:-3]
+    return html.strip()
 
 
 def main():
