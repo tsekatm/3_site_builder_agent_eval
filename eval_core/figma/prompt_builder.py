@@ -291,4 +291,5 @@ Return the complete single-file HTML (with <style> and <script> inline):
 11. Smooth scroll: html { scroll-behavior: smooth }
 12. Hover states on all buttons (opacity/scale transition) and cards (shadow transition)
 13. Footer: match the design's footer colour and layout exactly
-14. Logo: use the logo image URL from the manifest, or create a text logo with the brand name"""
+14. Logo: use the logo image URL from the manifest, or create a text logo with the brand name
+15. NAVIGATION MUST be a SEPARATE element ABOVE the hero — it must NOT overlay the hero image. The nav bar should have its own solid background (white/cream) so nav links are clearly readable. The hero section starts BELOW the navigation bar."""
