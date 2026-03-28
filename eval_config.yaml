@@ -1,4 +1,11 @@
 models:
+  routed:
+    model_id: "multi-model-routed"
+    provider: "routed"
+    params: {}
+    tags: ["multi-model", "optimised"]
+    enabled: true
+
   claude-haiku:
     model_id: "claude-haiku"
     provider: "claude-code"

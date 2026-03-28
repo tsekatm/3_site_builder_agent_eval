@@ -39,6 +39,7 @@ from eval_core.scoring.violations import ViolationCatalogue
 from eval_core.types import (
     ActionScore, StageScore, TemplateResult, Violation, Severity, RunnerResponse,
 )
+from eval_core.routing import ModelRouter
 from eval_core.versioning.run_manager import RunManager
 
 
@@ -256,6 +257,11 @@ async def run_eval_for_template(
     # Create runners (auto-detect: direct API for Claude, Bedrock for others)
     agent_runner = _create_runner_auto(model_name, model_config, aws_profile, api_key)
     judge_runner = _create_runner_auto("judge", judge_config, aws_profile, api_key)
+
+    # Multi-model router (if model_name is "routed", use per-action routing)
+    router = None
+    if model_name == "routed":
+        router = ModelRouter(models=config.models)
     catalogue = ViolationCatalogue(Path(config.paths.violations))
     judge = OpusJudge(runner=judge_runner, violation_catalogue_yaml=catalogue.as_yaml_string())
 
@@ -300,7 +306,16 @@ async def run_eval_for_template(
         if extra_instructions:
             prompt += f"\n\n## IMPORTANT — Learned from previous actions\n{extra_instructions}"
 
-        response = await agent_runner.invoke(prompt)
+        # Route to optimal model per action (if router enabled)
+        current_runner = agent_runner
+        if router:
+            routed_model_name, routed_config = router.get_model_for_action(action.name)
+            current_runner = _create_runner_auto(routed_model_name, routed_config, aws_profile, api_key)
+            if on_progress:
+                on_progress(routed_model_name, template_name, action.name,
+                            f"routed to {routed_model_name}")
+
+        response = await current_runner.invoke(prompt)
 
         if response.error:
             # Agent failed — record critical violation
