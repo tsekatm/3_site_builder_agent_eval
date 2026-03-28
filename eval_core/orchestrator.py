@@ -96,10 +96,25 @@ AGENT_PROMPT = """You are a site builder agent customising a website template fo
 
 ## CRITICAL RULES
 1. Apply the changes described in the requirements above
-2. For ALL images (hero backgrounds, section backgrounds, logos, icons, gallery):
-   - Use Unsplash for photos: https://images.unsplash.com/photo-ID?w=WIDTH&h=HEIGHT&fit=crop
-   - Use Iconify for icons/logos: https://api.iconify.design/mdi/ICON-NAME.svg?color=%23HEX&width=W&height=H
-   - Choose images that match the business industry
+2. For ALL images — you MUST use REAL working URLs, not descriptions:
+   - Photos: use REAL Unsplash URLs. Pick the most relevant from these WORKING examples:
+     Restaurant/Food: https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1920&h=1080&fit=crop
+     Conference/Event: https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1920&h=1080&fit=crop
+     Safari/Wildlife: https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1920&h=1080&fit=crop
+     Office/Corporate: https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&h=1080&fit=crop
+     Technology/SaaS: https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920&h=1080&fit=crop
+     Agriculture: https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=1920&h=1080&fit=crop
+     Healthcare: https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920&h=1080&fit=crop
+     Construction: https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1920&h=1080&fit=crop
+     Gala/Formal: https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=1920&h=1080&fit=crop
+     Portrait: https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop
+     Nature/Landscape: https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&h=1080&fit=crop
+     Education: https://images.unsplash.com/photo-1523050854058-8df90110c476?w=1920&h=1080&fit=crop
+   - Icons/Logos: https://api.iconify.design/mdi/ICON-NAME.svg?color=%23HEX&width=W&height=H
+   - NEVER write a description as the src (WRONG: src="A beautiful sunset")
+   - NEVER use local paths (WRONG: src="images/hero.jpg")
+   - The src MUST start with https://
+   - Choose the image that best matches the business industry
 3. TEXT CONTRAST ON DARK BACKGROUNDS IS CRITICAL:
    - Any section with a background image MUST have a dark overlay (rgba(0,0,0,0.6) minimum)
    - Text on dark backgrounds or background images MUST be white (#FFFFFF) or very light
