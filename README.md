@@ -170,6 +170,16 @@ The evaluation drove 1,191 lines of improvements across 6 production skills:
 
 Diffs are in `skill_enhancements/`.
 
+### Continuous Improvement Loop
+
+This is not a one-shot evaluation. The framework runs continuously as a feedback loop:
+
+```
+Evaluate → Identify failure patterns → Enhance skills → Re-evaluate
+```
+
+Each evaluation round produces empirical data that drives targeted improvements to agent skills and prompt engineering. As skills improve, the evaluation catches new, subtler failure modes — raising the quality bar with every iteration. Round 2 is currently in progress with expanded model coverage and increased statistical power (15+ runs per model).
+
 ## Blog Series
 
 This work is documented in a 7-part article series:
