@@ -6,6 +6,15 @@ models:
     tags: ["multi-model", "optimised"]
     enabled: true
 
+  claude-sonnet:
+    model_id: "claude-sonnet"
+    provider: "claude-code"
+    params:
+      cli_model: "sonnet"
+      timeout_seconds: 600
+    tags: ["code-gen", "top-tier"]
+    enabled: true
+
   claude-haiku:
     model_id: "claude-haiku"
     provider: "claude-code"
