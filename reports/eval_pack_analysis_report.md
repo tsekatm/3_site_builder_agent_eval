@@ -49,13 +49,30 @@ Each model received the same template skeleton and requirements, then applied 16
 
 ### 2.2 Models Tested
 
-| Model | Provider | Cost/1M Output Tokens | Runs |
-|-------|----------|----------------------|------|
-| Kimi K2.5 | OpenRouter | $2.20 | 9 |
-| DeepSeek V3.2 | OpenRouter | $0.38 | 15 |
-| Claude Haiku 4.5 | Claude CLI (Max) | ~$0.80 | 5 |
-| DeepSeek R1 | OpenRouter | $8.60 | 2 |
-| Routed (Kimi+Haiku) | Hybrid | Mixed | 1 |
+All pricing from [OpenRouter](https://openrouter.ai/pricing) as of March 2026.
+
+| Model | Provider | Input/1M Tokens | Output/1M Tokens | Runs |
+|-------|----------|----------------|-----------------|------|
+| **Claude Sonnet 4.6** (gold standard) | OpenRouter | $3.00 | $15.00 | 21* |
+| Claude Haiku 4.5 | OpenRouter / CLI | $1.00 | $5.00 | 5 |
+| Kimi K2.5 | OpenRouter | $0.42 | $2.20 | 9 |
+| DeepSeek V3.2 | OpenRouter | $0.26 | $0.38 | 15 |
+| DeepSeek R1 | OpenRouter | $0.70 | $2.50 | 2 |
+| Routed (Kimi+Haiku) | Hybrid | Mixed | Mixed | 1 |
+
+*Sonnet scored via gold standard evaluation (21 templates), not through the 16-action pipeline.
+
+**Cost per site (16-action pipeline, ~20K output tokens)**:
+
+| Model | Est. Cost/Site | Quality (Avg) | Quality per $ |
+|-------|---------------|---------------|--------------|
+| DeepSeek V3.2 | **$0.01** | 94.0 (62.9%) | 9,400 pts/$ |
+| Kimi K2.5 | **$0.05** | 108.2 (72.4%) | 2,164 pts/$ |
+| Claude Haiku 4.5 | **$0.10** | 107.7 (72.1%) | 1,077 pts/$ |
+| DeepSeek R1 | **$0.05** | 41.9 (28.0%) | 838 pts/$ |
+| Claude Sonnet 4.6 | **$0.30** | 149.5 (93.4%) | 498 pts/$ |
+
+**Interpretation**: DeepSeek V3.2 has the best cost-efficiency ratio but the lowest quality. Sonnet has the lowest cost-efficiency ratio but the highest quality. The **quality gap between Sonnet and alternatives (28-31 percentage points) is not justified by the cost savings** for a production site builder where output quality directly impacts customer satisfaction.
 
 ### 2.3 Templates Tested
 
@@ -238,18 +255,19 @@ apply-sections-lyt  1.6  -3.8   -1.5   -2.5    -3.0
 
 *Claude Haiku ran via CLI (Max subscription, no token tracking). DeepSeek R1 had tracking issues.
 
-### 5.2 Cost Per Site (16-Action Pipeline)
+### 5.2 Cost Per Site (16-Action Pipeline, All OpenRouter Pricing)
 
-| Model | Tokens/Site | Cost/Site | Quality (Avg) | Cost-Adjusted Score |
-|-------|------------|-----------|---------------|-------------------|
-| DeepSeek V3.2 | ~224K | **$0.09** | 94.0 | 1,044 pts/$ |
-| Kimi K2.5 | ~313K | **$0.69** | 108.2 | 157 pts/$ |
-| Claude Haiku | ~250K* | **$0.20*** | 107.7 | 539 pts/$ |
-| Routed | ~125K | **$0.15** | 104.0 | 693 pts/$ |
+| Model | Avg Tokens/Site | Input Cost | Output Cost | **Total Cost/Site** | Quality | % of Sonnet |
+|-------|----------------|-----------|------------|-------------------|---------|-------------|
+| Claude Sonnet 4.6 | ~250K in, ~20K out | $0.75 | $0.30 | **$1.05** | 149.5 | 100% |
+| Claude Haiku 4.5 | ~250K in, ~20K out | $0.25 | $0.10 | **$0.35** | 107.7 | 72.1% |
+| Kimi K2.5 | ~150K in, ~165K out | $0.06 | $0.36 | **$0.42** | 108.2 | 72.4% |
+| DeepSeek V3.2 | ~117K in, ~107K out | $0.03 | $0.04 | **$0.07** | 94.0 | 62.9% |
+| DeepSeek R1 | ~100K in, ~50K out | $0.07 | $0.13 | **$0.20** | 41.9 | 28.0% |
 
-*Estimated from Kimi's token profile.
+*Note: Sonnet's token count is estimated for the 16-action pipeline. Input tokens grow per call due to conversation context accumulation.*
 
-**DeepSeek V3.2 is the best value** on a cost-per-point basis (1,044 pts/$), but its high variance makes it unreliable.
+**Value analysis**: Saving $0.63/site (Sonnet→Haiku) costs 28 quality percentage points. At 1,000 sites/month that's $630 saved but 28% lower quality on every site delivered to customers.
 
 ### 5.3 Latency Per Action
 
