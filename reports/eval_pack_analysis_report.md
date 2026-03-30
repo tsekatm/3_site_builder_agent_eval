@@ -11,7 +11,12 @@
 
 Over 6 days, we evaluated 5 AI models across 6 HTML templates using a 16-action evaluation pipeline to determine whether cheaper models could replace Claude for site generation. The eval pack tested template customisation (colours, fonts, logos, images, text, layout, SEO, accessibility) and Figma-to-site generation.
 
-**Key Finding**: No cheap model matches Claude Sonnet's quality. However, the evaluation exposed that **the architecture** — not the model — is the primary cost driver. Eliminating the 15-25 tool-call loop reduces cost by 86% while keeping Claude Sonnet.
+**Key Findings**:
+1. **No cheap model matches Claude Sonnet's quality** for production site generation.
+2. **Kimi K2.5 is the strongest alternative** — tied with Claude Haiku on average score (108.2 vs 107.7) at a fraction of the cost, but with higher variance.
+3. **Layout transformation is the hardest task** across all models — `apply-sections-layout` has a negative average score.
+4. **Data quality matters more than model quality** — improving Figma extraction (V1→V5) produced a bigger quality jump than switching models.
+5. **6 production skills were enhanced** with 1,191 lines of eval-driven improvements based on model failure patterns.
 
 ---
 
@@ -237,30 +242,43 @@ The biggest quality jump came from **improving the extraction** (V1→V2), not f
 
 ---
 
-## 7. Architecture Discovery
+## 7. Skill Enhancements Driven by Evaluation Data
 
-### 7.1 The Real Cost Driver
+### 7.1 Overview
 
-The evaluation revealed that the **architecture** — not the model — drives 80% of the cost:
+The eval pack's failure patterns were systematically analysed and converted into 6 production skill enhancements totalling 1,191 lines. These improvements were applied to the live agent skills in `3_site_builder_agent/skills/`.
 
-| Component | Current Architecture | Single-Call Architecture |
-|-----------|---------------------|------------------------|
-| API calls per site | 15-25 | **1** |
-| Input tokens | ~250,000 (quadratic growth) | ~4,300 |
-| Output tokens | ~15,000 | ~8,500 |
-| **Cost per site** | **$0.98** | **$0.14** |
+### 7.2 Enhancements Applied
 
-The 15-25 tool-call loop causes **quadratic token growth** — Claude re-reads the entire conversation on every call. A single call eliminates this overhead entirely.
+| Skill | Lines Added | Key Improvements |
+|-------|-------------|-----------------|
+| `colour_management.skill.md` | 180 | Contrast ratio enforcement, dark-bg detection, CSS variable validation |
+| `background_image_changer.skill.md` | 210 | Overlay rules (rgba min 0.5), image URL validation (must start https://), alt text requirements |
+| `layout_transformation.skill.md` | 250 | 32 layout pattern recipes, breakpoint checklist, grid-safe transformation rules |
+| `global_font_management.skill.md` | 145 | Font change checklist (heading, body, CTA, nav, footer), Google Fonts validation |
+| `template_customization.skill.md` | 220 | Verbatim content rule, section-by-section spec format, interactivity requirements |
+| `attachment_context_extraction.skill.md` | 186 | User-uploaded asset handling (logos, PDFs, URLs), brand extraction from attachments |
 
-### 7.2 Single-Call Pipeline Test Results
+### 7.3 Violation Catalogue
 
-| Mode | Input | Claude Sonnet Time | Output | Cost |
-|------|-------|-------------------|--------|------|
-| Figma URL → site | Design context (12K chars) | ~30s (API) | 26K chars | $0.11 |
-| Template + requirements | Template + CSS + reqs (35K chars) | ~30s (API) | 46K chars | $0.20 |
-| Text prompt only | Description (1K chars) | ~15s (API) | 30K chars | $0.12 |
+The eval pack produced a violation catalogue (`scoring/violations.yaml`) with 22 violation types:
 
-All three modes produce complete, deployable HTML in a single API call.
+| Category | Violations | Most Common |
+|----------|-----------|-------------|
+| Visual | 4 | VIS-BROKEN-IMAGE (-2.5), VIS-WRONG-IMAGE (-1.5) |
+| Structural | 3 | STRUCT-EMPTY-SECTION (-3.0), STRUCT-MISSING-NAV (-2.0) |
+| Accessibility | 3 | A11Y-DARK-TEXT-ON-DARK-BG (-3.0), A11Y-NO-SKIP-LINK (-1.0) |
+| Content | 3 | CONTENT-SECTION-MISSING (-3.0), CONTENT-PARAPHRASED (-0.5) |
+| Code | 2 | CODE-LOCAL-FILE-PATH (-2.0), CODE-INLINE-STYLE (-0.5) |
+| Interactivity | 6 | INT-NO-MOBILE-MENU (-2.0), INT-NO-HOVER-STATES (-1.0) |
+
+### 7.4 Impact on Quality
+
+These skill enhancements directly address the top failure modes observed across all models:
+- **Image hallucination** → skill now requires `https://` URLs with Unsplash fallback library
+- **Content paraphrasing** → skill now enforces "use EXACT text, do NOT paraphrase"
+- **Layout destruction** → skill provides 32 safe layout recipes instead of free-form CSS
+- **Contrast failures** → skill requires dark overlay on image backgrounds, WCAG AA minimum
 
 ---
 
@@ -319,29 +337,47 @@ Bedrock model access was revoked during the evaluation, forcing a pivot to OpenR
 
 ## 9. Recommendations
 
-### 9.1 Model Selection
+### 9.1 Skill & Prompt Improvements (Immediate — Apply Now)
 
-| Use Case | Recommended Model | Rationale |
-|----------|------------------|-----------|
-| **Production site generation** | Claude Sonnet (via OpenRouter) | Best quality, acceptable cost with single-call |
-| **Bulk/batch generation** | Kimi K2.5 (via OpenRouter) | 95% of Sonnet quality at 25% cost |
-| **Development/testing** | Claude Haiku (via CLI) | Free on Max subscription, reliable |
-| **NOT recommended** | DeepSeek R1 | Reasoning model, wrong fit for code generation |
+These improvements are already built and can be deployed to the production agent:
 
-### 9.2 Architecture
+| Recommendation | Evidence | Status |
+|----------------|----------|--------|
+| **Enforce verbatim text rule** in all content skills | Models paraphrase 30% of the time without explicit "use EXACT text" instruction | Applied to `template_customization.skill.md` |
+| **Include real image URLs** in every prompt | All 5 models hallucinate descriptions as `src` without real URLs | Applied — Unsplash library + Figma export |
+| **Section-by-section specification** | Models skip 1-2 sections when given a flat list of requirements | Applied to `template_customization.skill.md` |
+| **Dark overlay on image backgrounds** | 40% of runs had unreadable white-on-light text | Applied to `background_image_changer.skill.md` |
+| **Nav visibility rule** | All models default to transparent nav overlay on hero | Applied to prompt builder |
+| **Skip layout transformation** for now | Negative avg score (-0.8) — models break layouts more than they improve them. Let templates handle layout. | Recommendation |
 
-1. **Adopt single-call architecture** — eliminates 86% of cost regardless of model choice
-2. **Pre-extract Figma data** — rich extraction (V5) is critical for quality; don't rely on the model to fetch data
-3. **Skip layout transformation** — let the template handle layout; models only customise content, colours, fonts, images
-4. **Add visual verification** — Playwright screenshot comparison as quality gate before deployment
+### 9.2 Quality Gates (Add to Pipeline)
 
-### 9.3 Prompt Engineering
+| Gate | What It Catches | Implementation |
+|------|----------------|---------------|
+| **HTML visual checker** | Broken images, empty sections, contrast failures, missing nav | Built (`html_visual_checker.py`) — integrate into MCP staging tool |
+| **Playwright screenshot** | Visual regressions, blank pages, layout collapse | Built concept — needs CI integration |
+| **Placeholder scan** | Unreplaced `{{TOKENS}}`, lorem ipsum, "Your Company" | Simple regex check |
 
-1. **Verbatim text rules** — models paraphrase unless explicitly told "use EXACT text"
-2. **Real image URLs in prompt** — models hallucinate descriptions without them
-3. **Section-by-section spec** — prevents models from skipping sections
-4. **Nav background rule** — models default to transparent nav overlay without explicit instruction
-5. **No markdown output rule** — models wrap HTML in backticks without being told not to
+### 9.3 Figma Extraction (Critical for Figma-to-Site)
+
+| Recommendation | Evidence |
+|----------------|----------|
+| **Extract ALL text verbatim** with font/size/weight/colour | V1 (minimal data) produced "not even close" results; V2 (rich extraction) was dramatically better |
+| **Export vector icons as PNG** via Figma image API | Icons are component instances, not IMAGE fills — must be explicitly exported |
+| **Detect background colours from child rectangles** | Figma GROUPs often have no fill — the bg is a child RECTANGLE |
+| **Absorb tiny sections** into nearest large section | Small Figma groups (CTAs, icon frames) create spurious dark-background divs |
+| **Use section-by-section prompt format** | Models reproduce designs faithfully when given structured specs per section |
+
+### 9.4 Model Selection for Future Evaluation
+
+| Model | Verdict | Notes |
+|-------|---------|-------|
+| **Claude Sonnet** | Production choice | Best quality across all actions. Recommended for go-live. |
+| **Kimi K2.5** | Strong alternative | Tied with Haiku on avg (108.2). Best on images/text. High variance on layout. Monitor for improvements. |
+| **Claude Haiku** | Reliable baseline | Consistent (low variance 13.4). Good for testing/development. Weak on section backgrounds. |
+| **DeepSeek V3.2** | Cost-effective but unreliable | Best value (1,044 pts/$) but highest variance (28.9). Good runs (120.5) mixed with bad ones (25.8). |
+| **DeepSeek R1** | Not suitable | Reasoning model, not designed for code generation. Score 41.9/170. |
+| **Routed (multi-model)** | No benefit observed | 104.0 — below both Kimi (108.2) and Haiku (107.7) individually. Sequential handoff causes conflicts. |
 
 ---
 
