@@ -3,20 +3,35 @@
 **Date**: 2026-03-30
 **Author**: Data Analysis (Eval Pack)
 **Period**: 2026-03-23 to 2026-03-28 (6 days)
-**Status**: FINAL
+**Status**: V2 — Revised after data science review
 
 ---
 
 ## 1. Executive Summary
 
-Over 6 days, we evaluated 5 AI models across 6 HTML templates using a 16-action evaluation pipeline to determine whether cheaper models could replace Claude for site generation. The eval pack tested template customisation (colours, fonts, logos, images, text, layout, SEO, accessibility) and Figma-to-site generation.
+Over 6 days, we evaluated 5 AI models across 6 HTML templates using a 16-action evaluation pipeline to determine whether cheaper models could replace Claude for site generation. This was an **exploratory evaluation** — sample sizes are small, confidence intervals are wide, and the quantitative rankings should be treated as preliminary hypotheses, not established facts.
 
-**Key Findings**:
-1. **No cheap model matches Claude Sonnet's quality** for production site generation.
-2. **Kimi K2.5 is the strongest alternative** — tied with Claude Haiku on average score (108.2 vs 107.7) at a fraction of the cost, but with higher variance.
-3. **Layout transformation is the hardest task** across all models — `apply-sections-layout` has a negative average score.
-4. **Data quality matters more than model quality** — improving Figma extraction (V1→V5) produced a bigger quality jump than switching models.
-5. **6 production skills were enhanced** with 1,191 lines of eval-driven improvements based on model failure patterns.
+**What the data supports with confidence**:
+1. **Layout transformation is the hardest task** across all models — `apply-sections-layout` has a negative average score. This finding is consistent across all models and robust.
+2. **All models hallucinate image descriptions as src attributes** — universal, not model-specific.
+3. **Technical tasks (SEO, accessibility) are model-agnostic** — near-zero quality gap, candidates for cheaper models.
+4. **6 production skills were enhanced** with 1,191 lines of eval-driven improvements based on observed failure patterns. This is the highest-value deliverable.
+5. **Data quality matters** — improving Figma extraction (V1→V5) on one design produced a larger quality jump than switching models.
+
+**What the data suggests but does not prove**:
+- Sonnet likely produces the highest quality output, but was measured on a different scale (gold standard vs 16-action pipeline). The 41-point gap may partly reflect the measurement method.
+- Kimi K2.5, Claude Haiku, and DeepSeek V3.2 are **statistically indistinguishable** given the sample sizes (overlapping 95% confidence intervals).
+- Multi-model routing showed no benefit, but was tested once (n=1).
+
+### Statistical Limitations (Read Before Interpreting)
+
+| Concern | Detail |
+|---------|--------|
+| **Small sample sizes** | 2-15 runs per model. Need n≥16 for 80% statistical power. |
+| **Non-comparable baselines** | Sonnet scored via gold standard process, not the 16-action pipeline. |
+| **Overlapping confidence intervals** | Kimi [93, 124], Haiku [91, 124], DeepSeek [78, 110] — rankings 2-4 are noise. |
+| **Judge bias risk** | Claude judge scoring Claude models. No inter-rater calibration performed. |
+| **Incomplete template coverage** | Not all models tested on all templates. Averages span different subsets. |
 
 ---
 
@@ -45,7 +60,7 @@ Each model received the same template skeleton and requirements, then applied 16
 | 15 | add-accessibility | Technical |
 | 16 | verify-contrast | Quality |
 
-**Scoring**: Each action scored 0-10 by a Claude judge, with violation deductions (broken images -2.5, empty sections -3.0, dark-text-on-dark-bg -3.0, etc.). Maximum possible: 170 points.
+**Scoring**: Each action scored 0-10 by a Claude judge, with violation deductions (broken images -2.5, empty sections -3.0, dark-text-on-dark-bg -3.0, etc.). Maximum possible: 160 points (16 actions × 10 points each).
 
 ### 2.2 Models Tested
 
@@ -62,17 +77,7 @@ All pricing from [OpenRouter](https://openrouter.ai/pricing) as of March 2026.
 
 *Sonnet scored via gold standard evaluation (21 templates), not through the 16-action pipeline.
 
-**Cost per site (16-action pipeline, ~20K output tokens)**:
-
-| Model | Est. Cost/Site | Quality (Avg) | Quality per $ |
-|-------|---------------|---------------|--------------|
-| DeepSeek V3.2 | **$0.01** | 94.0 (62.9%) | 9,400 pts/$ |
-| Kimi K2.5 | **$0.05** | 108.2 (72.4%) | 2,164 pts/$ |
-| Claude Haiku 4.5 | **$0.10** | 107.7 (72.1%) | 1,077 pts/$ |
-| DeepSeek R1 | **$0.05** | 41.9 (28.0%) | 838 pts/$ |
-| Claude Sonnet 4.6 | **$0.30** | 149.5 (93.4%) | 498 pts/$ |
-
-**Interpretation**: DeepSeek V3.2 has the best cost-efficiency ratio but the lowest quality. Sonnet has the lowest cost-efficiency ratio but the highest quality. The **quality gap between Sonnet and alternatives (28-31 percentage points) is not justified by the cost savings** for a production site builder where output quality directly impacts customer satisfaction.
+**Cost per site**: See Section 5.2 for the authoritative cost analysis with full input + output token breakdown. Costs range from $0.07/site (DeepSeek V3.2) to $1.05/site (Sonnet) for the 16-action pipeline.
 
 ### 2.3 Templates Tested
 
@@ -102,37 +107,42 @@ All pricing from [OpenRouter](https://openrouter.ai/pricing) as of March 2026.
 
 ### 3.2 Model Comparison Against Sonnet Baseline
 
-| Rank | Model | Avg Score | vs Sonnet | % of Sonnet | Std Dev | Runs |
-|------|-------|-----------|-----------|-------------|---------|------|
-| — | **Claude Sonnet 4.6** (baseline) | **149.5** | — | **100%** | 0.0 | 21 |
-| 1 | Kimi K2.5 | 108.2 | -41.3 | **72.4%** | 20.1 | 9 |
-| 2 | Claude Haiku 4.5 | 107.7 | -41.8 | **72.1%** | 13.4 | 5 |
-| 3 | Routed (Kimi+Haiku) | 104.0 | -45.5 | **69.6%** | — | 1 |
-| 4 | DeepSeek V3.2 | 94.0 | -55.5 | **62.9%** | 28.9 | 15 |
-| 5 | DeepSeek R1 | 41.9 | -107.6 | **28.0%** | 3.3 | 2 |
+| Model | Avg Score | 95% CI | % of Max (160) | Std Dev | Runs |
+|-------|-----------|--------|----------------|---------|------|
+| **Claude Sonnet 4.6** (gold std)† | **149.5** | N/A† | **93.4%** | 0.0† | 21 |
+| Kimi K2.5 | 108.2 | [92.7, 123.7] | 67.6% | 20.1 | 9 |
+| Claude Haiku 4.5 | 107.7 | [91.0, 124.4] | 67.3% | 13.4 | 5 |
+| Routed (Kimi+Haiku) | 104.0 | N/A (n=1) | 65.0% | — | 1 |
+| DeepSeek V3.2 | 94.0 | [78.0, 110.0] | 58.8% | 28.9 | 15 |
+| DeepSeek R1 | 41.9 | N/A (n=2) | 26.2% | 3.3 | 2 |
 
-**Key Insight**: The best alternative model (Kimi K2.5) achieves only **72.4% of Sonnet's quality**. There is a 41-point gap that no cheaper model closes.
+†**Measurement caveat**: Sonnet was scored via gold standard evaluation (automated quality signals), NOT through the same 16-action pipeline as alternatives. Its score and zero variance reflect the measurement method, not necessarily that Sonnet produces identical output every time. **The 41-point gap between Sonnet and alternatives may be inflated by this methodological difference.**
 
-### 3.3 Score Distribution (Normalised Against Sonnet)
+**Key Insight**: Kimi, Haiku, and DeepSeek V3.2 confidence intervals **overlap heavily** — their ranking (2nd, 3rd, 4th) is not statistically significant. What IS significant: all three cluster around 59-68% of max, well below Sonnet's 93%.
+
+### 3.3 Score Distribution (out of 160 max)
 
 ```
-Sonnet 4.6:    ████████████████████████████████████████████████████████ 149.5 (93%)
-Kimi K2.5:     ████████████████████████████████████████                108.2 (68%)
-Claude Haiku:  ████████████████████████████████████████                107.7 (67%)
-Routed:        ██████████████████████████████████████                  104.0 (65%)
-DeepSeek V3.2: ██████████████████████████████████                       94.0 (59%)
-DeepSeek R1:   ███████████████                                          41.9 (26%)
+Sonnet 4.6:    ████████████████████████████████████████████████████████ 149.5/160 (93%)
+Kimi K2.5:     ████████████████████████████████████████                108.2/160 (68%)  ±15.5
+Claude Haiku:  ████████████████████████████████████████                107.7/160 (67%)  ±16.7
+Routed:        ██████████████████████████████████████                  104.0/160 (65%)  n=1
+DeepSeek V3.2: ██████████████████████████████████                       94.0/160 (59%)  ±16.0
+DeepSeek R1:   ███████████████                                          41.9/160 (26%)  n=2
                |---------|---------|---------|---------|---------|
                0        30        60        90       120       150
+
+Note: ± values are 95% CI half-widths. Kimi, Haiku, and DeepSeek V3.2 CIs overlap.
 ```
 
 ### 3.4 Observations
 
-- **27-point quality gap**: Even the best alternative (Kimi 108.2) is 41 points below Sonnet (149.5). This gap is consistent across templates.
-- **Kimi K2.5 and Haiku are statistically tied** (108.2 vs 107.7) but both are ~72% of Sonnet quality.
-- **DeepSeek V3.2 is unreliable** — highest variance (28.9). Best run (120.5) approaches Haiku, worst run (25.8) is catastrophic.
-- **DeepSeek R1 is unsuitable** — reasoning model architecture is wrong for code generation (28% of Sonnet).
-- **Routed model adds no value** — hybrid routing (104.0) scored below both Kimi (108.2) and Haiku (107.7) individually.
+- **Alternatives cluster at 59-68% of max** while Sonnet's gold standard scores 93%. The gap is directionally clear but its exact size is uncertain due to different measurement methods (see caveat above).
+- **Kimi K2.5, Haiku, and DeepSeek V3.2 are statistically indistinguishable** — their confidence intervals overlap. Rankings 2-4 should be treated as noise with the current sample sizes.
+- **Haiku has the lowest variance** (SD 13.4 vs Kimi's 20.1) — more predictable, which matters for production consistency.
+- **DeepSeek V3.2 has the highest variance** (SD 28.9). Best run (120.5) approaches Haiku, worst (25.8) is catastrophic. Unreliable for production.
+- **DeepSeek R1 is unsuitable** — reasoning model, not designed for code generation (26% of max). Only 2 runs; conclusion is preliminary but directionally strong.
+- **Routed model (n=1)** — insufficient data to draw any conclusion. The concept may have merit with better routing logic or more templates.
 
 ### 3.5 Score Per Template (All Models vs Sonnet)
 
@@ -306,9 +316,11 @@ We tested whether models could generate a complete website from Figma design dat
 | DeepSeek V3.2 | 178s | 26K | Yes | Readable | Correct | All 9 real names | Some missing | Gold bg + social | Good |
 | Haiku | 120s | 21K | Partial | Overlap issue | Correct | First 3 only | Grey boxes | Gold bg + social | Weak |
 
-### 6.4 Key Learning: Data Quality > Model Quality
+### 6.4 Key Learning: Data Quality Matters (Single Design, Preliminary)
 
-The biggest quality jump came from **improving the extraction** (V1→V2), not from switching models. When given the same rich data, all models produced recognisable reproductions. The extraction pipeline matters more than the model choice.
+On the Experience Madikwe design, the biggest quality jump came from **improving the extraction** (V1→V2), not from switching models. When given the same rich data, all models produced recognisable reproductions.
+
+**Caveat**: This finding is based on a single Figma design (n=1). Testing across multiple designs and extraction levels would be needed to generalise the claim that "data quality matters more than model quality."
 
 ---
 
@@ -443,15 +455,53 @@ These improvements are already built and can be deployed to the production agent
 | Model | Verdict | Notes |
 |-------|---------|-------|
 | **Claude Sonnet** | Production choice | Best quality across all actions. Recommended for go-live. |
-| **Kimi K2.5** | Strong alternative | Tied with Haiku on avg (108.2). Best on images/text. High variance on layout. Monitor for improvements. |
-| **Claude Haiku** | Reliable baseline | Consistent (low variance 13.4). Good for testing/development. Weak on section backgrounds. |
-| **DeepSeek V3.2** | Cost-effective but unreliable | Best value (1,044 pts/$) but highest variance (28.9). Good runs (120.5) mixed with bad ones (25.8). |
-| **DeepSeek R1** | Not suitable | Reasoning model, not designed for code generation. Score 41.9/170. |
-| **Routed (multi-model)** | No benefit observed | 104.0 — below both Kimi (108.2) and Haiku (107.7) individually. Sequential handoff causes conflicts. |
+| **Kimi K2.5** | Monitor | Statistically tied with Haiku. Higher variance (SD 20.1). Could be better or worse — need more data. |
+| **Claude Haiku** | Monitor | Statistically tied with Kimi. Lower variance (SD 13.4) = more predictable. |
+| **DeepSeek V3.2** | Monitor | Cheapest ($0.07/site). Highest variance (SD 28.9). Potentially viable for non-layout tasks (SEO, a11y). |
+| **DeepSeek R1** | Not suitable | Reasoning model, wrong fit for code generation. 26% of max (n=2). |
+| **Routed (multi-model)** | Inconclusive | n=1. Concept untested at meaningful scale. |
+
+### 9.5 Task-Routing Matrix (Potential Future Optimisation)
+
+Rather than one model for everything, the per-action data suggests task-specific routing:
+
+| Task Category | Sonnet Gap | Candidate for Cheaper Model? | Evidence |
+|--------------|-----------|-------|----------|
+| Technical (SEO, a11y, schema) | 0.0 - 0.7 pts | **Yes** — all models perform equally | Near-zero gap across all 5 models |
+| Content (text updates) | 1.3 - 2.7 pts | **Maybe** — if verbatim rules enforced | Models paraphrase without explicit instruction |
+| Brand (colours, fonts) | 2.4 - 3.3 pts | **Risky** — CSS variable application inconsistent | Alternatives miss variables 30-48% of the time |
+| Images (hero, section bgs) | 2.3 - 2.8 pts | **No** — hallucination is universal | All alternatives write descriptions as src |
+| Layout (hero, sections) | 5.4 - 10.2 pts | **No** — alternatives actively break layouts | Negative scores on section layout |
 
 ---
 
-## 10. Data Summary
+## 10. Next Evaluation Round — Requirements
+
+Based on the data science review, a rigorous second round should address:
+
+### 10.1 Fix the Data Foundation
+- **Run Sonnet through the same 16-action pipeline** as alternatives (not gold standard scoring)
+- **Standardise scoring denominator** — use 160 consistently
+- **One authoritative cost table** with explicit token assumptions
+
+### 10.2 Increase Statistical Power
+- **Minimum 15 runs per model** across the same template set (need n≥16 for 80% power to detect 20-point difference at α=0.05)
+- **Test all models on all templates** — no missing cells
+- **Report confidence intervals** in all tables
+
+### 10.3 Strengthen the Judge
+- **Calibrate inter-rater reliability** — score a subset with a second judge model (GPT-4o or Gemini) and compute Cohen's kappa
+- **Make HTMLVisualChecker mandatory** on every run (not optional)
+- **Blind the judge** — strip model-identifying patterns from outputs before scoring
+
+### 10.4 Estimated Effort
+- 5 models × 6 templates × 15 runs = 450 pipeline runs
+- At ~40 min/run = ~300 hours of compute
+- Estimated 3-5 days with parallelisation
+
+---
+
+## 11. Data Summary
 
 | Metric | Value |
 |--------|-------|
